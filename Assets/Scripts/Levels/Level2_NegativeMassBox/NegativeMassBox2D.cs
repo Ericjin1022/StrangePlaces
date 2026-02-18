@@ -236,34 +236,26 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
 
             Transform existing = transform.Find("RiderSensor");
-            GameObject sensorGo;
-            if (existing != null)
+            if (existing == null)
             {
-                sensorGo = existing.gameObject;
-            }
-            else
-            {
-                sensorGo = new GameObject("RiderSensor");
-                sensorGo.transform.SetParent(transform, false);
+                Debug.LogError($"[负质量箱] 缺少子物体 'RiderSensor'（已关闭骑乘加速）。对象：{name}");
+                enableRiderBoost = false;
+                return;
             }
 
-            sensorGo.transform.localPosition = new Vector3(0f, 0.62f, 0f);
-            sensorGo.transform.localScale = Vector3.one;
-
+            GameObject sensorGo = existing.gameObject;
             BoxCollider2D sensorCollider = sensorGo.GetComponent<BoxCollider2D>();
-            if (sensorCollider == null)
+            NegativeMassRiderSensor2D sensor = sensorGo.GetComponent<NegativeMassRiderSensor2D>();
+            if (sensorCollider == null || sensor == null)
             {
-                sensorCollider = sensorGo.AddComponent<BoxCollider2D>();
+                Debug.LogError($"[负质量箱] RiderSensor 未配置必要组件 BoxCollider2D/NegativeMassRiderSensor2D（已关闭骑乘加速）。对象：{name}");
+                enableRiderBoost = false;
+                return;
             }
 
-            sensorCollider.isTrigger = true;
-            sensorCollider.size = new Vector2(0.9f, 0.2f);
-            sensorCollider.offset = Vector2.zero;
-
-            NegativeMassRiderSensor2D sensor = sensorGo.GetComponent<NegativeMassRiderSensor2D>();
-            if (sensor == null)
+            if (!sensorCollider.isTrigger)
             {
-                sensor = sensorGo.AddComponent<NegativeMassRiderSensor2D>();
+                Debug.LogWarning($"[负质量箱] RiderSensor 的 BoxCollider2D 不是 Trigger，骑乘检测可能失效。对象：{name}");
             }
 
             sensor.Bind(this);
@@ -362,7 +354,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (_boxCollider2D == null)
             {
-                _boxCollider2D = go.AddComponent<BoxCollider2D>();
+                // Require scene configuration (no runtime AddComponent).
             }
 
             if (_boxCollider2D == null)
@@ -372,9 +364,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 return;
             }
 
-            _boxCollider2D.size = Vector2.one;
-            _boxCollider2D.offset = Vector2.zero;
-            _boxCollider2D.isTrigger = false;
+            // Collider size/offset are configured in the scene.
 
             if (_body == null)
             {
@@ -383,7 +373,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (_body == null)
             {
-                _body = go.AddComponent<Rigidbody2D>();
+                // Require scene configuration (no runtime AddComponent).
             }
 
             if (_body == null)
@@ -393,11 +383,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 return;
             }
 
-            _body.bodyType = RigidbodyType2D.Dynamic;
-            _body.freezeRotation = true;
-            _body.constraints = RigidbodyConstraints2D.FreezeRotation;
-            _body.interpolation = RigidbodyInterpolation2D.Interpolate;
-            _body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            // Rigidbody settings are configured in the scene.
         }
 
         private static void Remove3DColliders(GameObject go)

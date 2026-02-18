@@ -36,7 +36,7 @@ namespace StrangePlaces.DemoQuantumCollapse
             BoxCollider2D box = GetComponent<BoxCollider2D>();
             if (box == null)
             {
-                box = go.AddComponent<BoxCollider2D>();
+                // Require scene configuration (no runtime AddComponent).
             }
 
             if (box == null)
@@ -46,10 +46,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 return;
             }
 
-            box.size = Vector2.one;
-            box.offset = Vector2.zero;
-            box.isTrigger = false;
-            box.enabled = true;
+            // Collider size/offset are configured in the scene.
         }
 
         private void Despawn()
@@ -89,4 +86,3 @@ namespace StrangePlaces.DemoQuantumCollapse
         }
     }
 }
-

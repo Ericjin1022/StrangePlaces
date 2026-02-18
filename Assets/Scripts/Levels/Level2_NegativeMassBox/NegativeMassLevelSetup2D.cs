@@ -62,7 +62,6 @@ namespace StrangePlaces.DemoQuantumCollapse
             {
                 EnsureHUD();
                 EnsurePlayerBody();
-                EnsureLevelRoot2DOnly();
                 EnsureEnvironmentColliders();
                 EnsureDoorSwitchGoal();
                 EnsureBoxes();
@@ -101,7 +100,11 @@ namespace StrangePlaces.DemoQuantumCollapse
         {
             if (GetComponent<NegativeMassHUD>() == null)
             {
-                gameObject.AddComponent<NegativeMassHUD>();
+                Debug.LogError("[负质量关卡] 缺少 NegativeMassHUD，请在场景中手动挂载（已停止运行时自动补齐）。");
+                if (Application.isPlaying)
+                {
+                    enabled = false;
+                }
             }
         }
 
@@ -110,19 +113,31 @@ namespace StrangePlaces.DemoQuantumCollapse
             GameObject doorGo = GameObject.Find(doorName);
             if (doorGo != null && doorGo.GetComponent<DoorController2D>() == null)
             {
-                doorGo.AddComponent<DoorController2D>();
+                Debug.LogError("[负质量关卡] Door 缺少 DoorController2D，请在场景中手动挂载（已停止运行时自动补齐）。");
+                if (Application.isPlaying)
+                {
+                    enabled = false;
+                }
             }
 
             GameObject switchGo = GameObject.Find(switchName);
             if (switchGo != null && switchGo.GetComponent<DoorSwitch2D>() == null)
             {
-                switchGo.AddComponent<DoorSwitch2D>();
+                Debug.LogError("[负质量关卡] DoorSwitch 缺少 DoorSwitch2D，请在场景中手动挂载（已停止运行时自动补齐）。");
+                if (Application.isPlaying)
+                {
+                    enabled = false;
+                }
             }
 
             GameObject goalGo = GameObject.Find(goalName);
             if (goalGo != null && goalGo.GetComponent<NegativeMassGoal>() == null)
             {
-                goalGo.AddComponent<NegativeMassGoal>();
+                Debug.LogError("[负质量关卡] Goal 缺少 NegativeMassGoal，请在场景中手动挂载（已停止运行时自动补齐）。");
+                if (Application.isPlaying)
+                {
+                    enabled = false;
+                }
             }
         }
 
@@ -131,32 +146,56 @@ namespace StrangePlaces.DemoQuantumCollapse
             GameObject redSolo = GameObject.Find(redSoloName);
             if (redSolo != null)
             {
-                NegativeMassBox2D solo = EnsureComponent<NegativeMassBox2D>(redSolo);
-                float ceilingDistance = Mathf.Max(soloRedCeilingCheckDistance, 2.0f);
-                solo.ConfigureAsSolo(soloRedUnblockedGravityScale, soloRedBlockedGravityScale, ceilingDistance, ~0);
-                EnsureMass(solo.Body, 1.0f);
+                NegativeMassBox2D solo = redSolo.GetComponent<NegativeMassBox2D>();
+                if (solo == null)
+                {
+                    Debug.LogError("[负质量关卡] RedBox_Solo 缺少 NegativeMassBox2D，请在场景中手动挂载（已停止运行时自动补齐）。");
+                }
+                else
+                {
+                    float ceilingDistance = Mathf.Max(soloRedCeilingCheckDistance, 2.0f);
+                    solo.ConfigureAsSolo(soloRedUnblockedGravityScale, soloRedBlockedGravityScale, ceilingDistance, ~0);
+                    EnsureMass(solo.Body, 1.0f);
+                }
             }
 
             GameObject blackGo = GameObject.Find(blackElevatorName);
             Rigidbody2D blackBody = null;
             if (blackGo != null)
             {
-                blackBody = EnsureDynamicBody(blackGo, blackBoxMass, blackBoxGravityScale);
+                blackBody = blackGo.GetComponent<Rigidbody2D>();
+                if (blackBody == null)
+                {
+                    Debug.LogError("[负质量关卡] BlackBox_Elevator 缺少 Rigidbody2D，请在场景中手动挂载（已停止运行时自动补齐）。");
+                }
+                else
+                {
+                    EnsureMass(blackBody, blackBoxMass);
+                    blackBody.gravityScale = blackBoxGravityScale;
+                }
             }
 
             GameObject redElevator = GameObject.Find(redElevatorName);
             if (redElevator != null)
             {
-                NegativeMassBox2D elevator = EnsureComponent<NegativeMassBox2D>(redElevator);
-                elevator.ConfigureAsElevator(elevatorRedGravityScale, elevatorBoostMultiplier, elevatorMaxExtraLiftForce);
-                EnsureMass(elevator.Body, 1.0f);
+                NegativeMassBox2D elevator = redElevator.GetComponent<NegativeMassBox2D>();
+                if (elevator == null)
+                {
+                    Debug.LogError("[负质量关卡] RedBox_Elevator 缺少 NegativeMassBox2D，请在场景中手动挂载（已停止运行时自动补齐）。");
+                }
+                else
+                {
+                    elevator.ConfigureAsElevator(elevatorRedGravityScale, elevatorBoostMultiplier, elevatorMaxExtraLiftForce);
+                    EnsureMass(elevator.Body, 1.0f);
+                }
 
                 if (blackBody != null)
                 {
                     DistanceJoint2D joint = redElevator.GetComponent<DistanceJoint2D>();
                     if (joint == null)
                     {
-                        joint = redElevator.AddComponent<DistanceJoint2D>();
+                        Debug.LogError("[负质量关卡] RedBox_Elevator 缺少 DistanceJoint2D，请在场景中手动挂载并配置连接（已停止运行时自动补齐）。");
+                        return;
                     }
 
                     joint.connectedBody = blackBody;
@@ -190,168 +229,18 @@ namespace StrangePlaces.DemoQuantumCollapse
                     continue;
                 }
 
-                EnsureStaticCollider2D(t.gameObject);
-            }
-
-            EnsureFloorColliderFallback(levelRoot.transform, env);
-        }
-
-        private void EnsureLevelRoot2DOnly()
-        {
-            GameObject levelRoot = GameObject.Find(levelRootName);
-            if (levelRoot == null)
-            {
-                return;
-            }
-
-            Remove3DCollidersRecursive(levelRoot.transform);
-            Remove3DRigidbodiesRecursive(levelRoot.transform);
-        }
-
-        private static void Remove3DCollidersRecursive(Transform root)
-        {
-            if (root == null)
-            {
-                return;
-            }
-
-            Collider[] colliders = root.GetComponentsInChildren<Collider>(true);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                Collider c = colliders[i];
+                Collider2D c = t.GetComponent<Collider2D>();
                 if (c == null)
                 {
+                    Debug.LogError($"[负质量关卡] 环境物体缺少 Collider2D：{t.name}（已停止运行时自动补齐）。");
                     continue;
                 }
 
-                if (Application.isPlaying)
+                if (!c.enabled || c.isTrigger)
                 {
-                    Destroy(c);
-                }
-                else
-                {
-                    DestroyImmediate(c);
+                    Debug.LogWarning($"[负质量关卡] 环境物体 Collider2D 可能配置不正确（enabled={c.enabled} isTrigger={c.isTrigger}）：{t.name}");
                 }
             }
-        }
-
-        private static void Remove3DRigidbodiesRecursive(Transform root)
-        {
-            if (root == null)
-            {
-                return;
-            }
-
-            Rigidbody[] rigidbodies = root.GetComponentsInChildren<Rigidbody>(true);
-            for (int i = 0; i < rigidbodies.Length; i++)
-            {
-                Rigidbody rb = rigidbodies[i];
-                if (rb == null)
-                {
-                    continue;
-                }
-
-                if (Application.isPlaying)
-                {
-                    Destroy(rb);
-                }
-                else
-                {
-                    DestroyImmediate(rb);
-                }
-            }
-        }
-
-        private static void EnsureFloorColliderFallback(Transform levelRoot, Transform environment)
-        {
-            Transform floorT = environment != null ? environment.Find("Floor") : null;
-            if (floorT == null)
-            {
-                floorT = levelRoot != null ? levelRoot.Find("Environment/Floor") : null;
-            }
-
-            if (floorT == null)
-            {
-                return;
-            }
-
-            Collider2D floorCollider = floorT.GetComponent<Collider2D>();
-            if (floorCollider != null && floorCollider.enabled && !floorCollider.isTrigger)
-            {
-                return;
-            }
-
-            Transform fallback = environment.Find("FloorCollider");
-            GameObject go;
-            if (fallback != null)
-            {
-                go = fallback.gameObject;
-            }
-            else
-            {
-                go = new GameObject("FloorCollider");
-                go.transform.SetParent(environment, false);
-            }
-
-            go.transform.position = floorT.position;
-            go.transform.rotation = floorT.rotation;
-            go.transform.localScale = floorT.localScale;
-
-            BoxCollider2D c = go.GetComponent<BoxCollider2D>();
-            if (c == null)
-            {
-                c = go.AddComponent<BoxCollider2D>();
-            }
-
-            c.size = Vector2.one;
-            c.offset = Vector2.zero;
-            c.isTrigger = false;
-            c.enabled = true;
-        }
-
-        private static void EnsureStaticCollider2D(GameObject go)
-        {
-            Remove3DColliders(go);
-
-            BoxCollider2D c = go.GetComponent<BoxCollider2D>();
-            if (c == null)
-            {
-                c = go.AddComponent<BoxCollider2D>();
-            }
-
-            c.size = Vector2.one;
-            c.offset = Vector2.zero;
-            c.isTrigger = false;
-            c.enabled = true;
-        }
-
-        private static Rigidbody2D EnsureDynamicBody(GameObject go, float mass, float gravityScale)
-        {
-            Remove3DColliders(go);
-
-            BoxCollider2D box = go.GetComponent<BoxCollider2D>();
-            if (box == null)
-            {
-                box = go.AddComponent<BoxCollider2D>();
-            }
-            box.size = Vector2.one;
-            box.offset = Vector2.zero;
-            box.isTrigger = false;
-
-            Rigidbody2D rb = go.GetComponent<Rigidbody2D>();
-            if (rb == null)
-            {
-                rb = go.AddComponent<Rigidbody2D>();
-            }
-
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.mass = Mathf.Max(0.01f, mass);
-            rb.gravityScale = gravityScale;
-            rb.freezeRotation = true;
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            return rb;
         }
 
         private static void EnsureMass(Rigidbody2D rb, float mass)
@@ -364,46 +253,6 @@ namespace StrangePlaces.DemoQuantumCollapse
             rb.mass = Mathf.Max(0.01f, mass);
         }
 
-        private static T EnsureComponent<T>(GameObject go) where T : Component
-        {
-            if (go == null)
-            {
-                return null;
-            }
-
-            T c = go.GetComponent<T>();
-            if (c != null)
-            {
-                return c;
-            }
-
-            return go.AddComponent<T>();
-        }
-
-        private static void Remove3DColliders(GameObject go)
-        {
-            if (go == null)
-            {
-                return;
-            }
-
-            Collider[] colliders = go.GetComponents<Collider>();
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i] != null)
-                {
-                    if (Application.isPlaying)
-                    {
-                        Destroy(colliders[i]);
-                    }
-                    else
-                    {
-                        DestroyImmediate(colliders[i]);
-                    }
-                }
-            }
-        }
-
         private static void EnsurePlayerBody()
         {
             PlayerController2D player = FindFirstObjectByType<PlayerController2D>();
@@ -413,28 +262,9 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
 
             Transform existing = player.transform.Find("Body");
-            if (existing != null)
+            if (existing == null)
             {
-                // Respect manual edits in the scene.
-                return;
-            }
-
-            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            body.name = "Body";
-            body.transform.SetParent(player.transform, false);
-            body.transform.localPosition = new Vector3(0f, 0f, 0.1f);
-            body.transform.localScale = Vector3.one;
-
-            Collider c = body.GetComponent<Collider>();
-            if (c != null)
-            {
-                c.enabled = false;
-            }
-
-            DemoColorRenderer color = body.AddComponent<DemoColorRenderer>();
-            if (color != null)
-            {
-                color.SetColor(new Color(0.95f, 0.95f, 0.97f, 1f));
+                Debug.LogWarning("[负质量关卡] Player 缺少子物体 'Body'（已停止运行时自动创建）。");
             }
         }
     }

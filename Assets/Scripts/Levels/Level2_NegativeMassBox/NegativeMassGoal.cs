@@ -38,12 +38,20 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (_trigger == null)
             {
-                _trigger = gameObject.AddComponent<BoxCollider2D>();
+                // Require scene configuration (no runtime AddComponent).
             }
 
-            _trigger.size = Vector2.one;
-            _trigger.offset = Vector2.zero;
-            _trigger.isTrigger = true;
+            if (_trigger == null)
+            {
+                Debug.LogError("[终点] 初始化失败：未在场景中配置 BoxCollider2D（且应为 Trigger）。");
+                enabled = false;
+                return;
+            }
+
+            if (!_trigger.isTrigger)
+            {
+                Debug.LogWarning("[终点] BoxCollider2D 不是 Trigger，可能导致无法触发通关。");
+            }
         }
 
         private static void Remove3DColliders(GameObject go)

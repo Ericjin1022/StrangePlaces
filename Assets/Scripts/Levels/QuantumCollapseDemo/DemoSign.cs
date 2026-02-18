@@ -67,21 +67,16 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (_boardRenderer == null)
             {
-                GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                quad.name = "Board";
-                quad.transform.SetParent(transform, false);
-                quad.transform.localPosition = Vector3.zero;
-                quad.transform.localRotation = Quaternion.identity;
-                quad.transform.localScale = Vector3.one;
-                Collider collider = quad.GetComponent<Collider>();
-                if (collider != null)
+                Transform boardT = transform.Find("Board");
+                if (boardT != null)
                 {
-                    // Avoid DestroyImmediate (can be invoked during restricted callbacks when exiting play mode).
-                    // Also keep this sign non-interactive.
-                    collider.enabled = false;
+                    _boardRenderer = boardT.GetComponent<MeshRenderer>();
                 }
+            }
 
-                _boardRenderer = quad.GetComponent<MeshRenderer>();
+            if (_boardRenderer == null)
+            {
+                _boardRenderer = GetComponentInChildren<MeshRenderer>();
             }
 
             if (_boardMaterialInstance == null && _boardRenderer != null)
@@ -101,19 +96,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (_textMesh == null)
             {
-                GameObject textGo = new("Text");
-                textGo.transform.SetParent(transform, false);
-                textGo.transform.localRotation = Quaternion.identity;
-                textGo.transform.localPosition = new Vector3(0f, 0f, -0.01f);
-                textGo.transform.localScale = Vector3.one;
-
-                _textMesh = textGo.AddComponent<TextMesh>();
-                _textMesh.anchor = TextAnchor.MiddleLeft;
-                _textMesh.alignment = TextAlignment.Left;
-                _textMesh.richText = true;
-                _textMesh.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-
-                _textRenderer = textGo.GetComponent<Renderer>();
+                _textMesh = GetComponentInChildren<TextMesh>();
             }
 
             if (_textRenderer == null && _textMesh != null)

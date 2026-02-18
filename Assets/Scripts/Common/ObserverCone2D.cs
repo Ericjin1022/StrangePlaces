@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -30,9 +30,9 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private PlayerController2D _player;
         private Collider2D _selfCollider;
-        private LineRenderer _leftLine;
-        private LineRenderer _rightLine;
-        private LineRenderer _centerLine;
+        [SerializeField] private LineRenderer _leftLine;
+        [SerializeField] private LineRenderer _rightLine;
+        [SerializeField] private LineRenderer _centerLine;
 
         private IObservationTarget[] _targets = System.Array.Empty<IObservationTarget>();
         private readonly Dictionary<IObservationTarget, float> _lastObservedTime = new();
@@ -51,7 +51,10 @@ namespace StrangePlaces.DemoQuantumCollapse
             _selfCollider = GetComponent<Collider2D>();
             if (showDebugLines)
             {
-                CreateLineRenderers();
+                if (_leftLine == null || _rightLine == null || _centerLine == null)
+                {
+                    Debug.LogWarning("[ObserverCone2D] showDebugLines is enabled, but LineRenderers are not assigned.");
+                }
             }
         }
 
@@ -61,7 +64,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (debugLogging)
             {
-                Debug.LogWarning($"[观察] 启动：alwaysOn={(alwaysOn ? "是" : "否")} 按键={holdKey} 距离={maxDistance:0.00} 角度={coneAngleDegrees:0.0}（已开启调试日志）");
+                // Debug log removed
             }
         }
 
@@ -131,7 +134,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                         _lastObservedState[target] = observedNow;
                         MonoBehaviour mb = target as MonoBehaviour;
                         string name = mb != null ? mb.name : target.GetType().Name;
-                        Debug.Log($"[观察] 目标={name} 观察={(observedNow ? "是" : "否")} 直接={(directlyObserved ? "是" : "否")}");
+                        // Debug log removed
                     }
                 }
 
@@ -258,13 +261,13 @@ namespace StrangePlaces.DemoQuantumCollapse
                 if (_lastTargetsHash != hash)
                 {
                     _lastTargetsHash = hash;
-                    Debug.LogWarning($"[观察] 刷新目标：behaviours={behaviours.Length} targets={_targets.Length} 距离={maxDistance:0.00} 角度={coneAngleDegrees:0.0} mediumIsTarget={(mediumIsTarget ? "是" : "否")}");
+                    // Debug log removed
                     for (int i = 0; i < _targets.Length; i++)
                     {
                         MonoBehaviour mb = _targets[i] as MonoBehaviour;
                         if (mb != null)
                         {
-                            Debug.Log($"[观察] 目标[{i}]={mb.name} 类型={mb.GetType().Name} 激活={(mb.isActiveAndEnabled ? "是" : "否")}");
+                            // Debug log removed
                         }
                     }
                 }
@@ -293,7 +296,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (named == null)
             {
-                Debug.LogWarning($"[观察] 调试目标未找到：debugTargetName='{wanted}'。请把它改成某个可观察目标的物体名，或清空此字段关闭该目标诊断。");
+                // Debug log removed
                 return;
             }
 
@@ -336,11 +339,11 @@ namespace StrangePlaces.DemoQuantumCollapse
 
                 if (nearestCollider == null)
                 {
-                    Debug.Log("[观察] 目标诊断：射线未命中任何 2D 碰撞体（视线判定会当作无遮挡）");
+                    // Debug log removed
                 }
                 else
                 {
-                    Debug.Log($"[观察] 目标诊断：射线最近命中={nearestCollider.name} layer={LayerMask.LayerToName(nearestCollider.gameObject.layer)} 距离={nearest:0.00} 归属目标={(named.OwnsCollider(nearestCollider) ? "是" : "否")}");
+                    // Debug log removed
                 }
             }
         }
@@ -358,7 +361,7 @@ namespace StrangePlaces.DemoQuantumCollapse
             Vector2 min = b.min;
             Vector2 max = b.max;
 
-            // Approximate “any part enters the cone” by checking several points on the collider bounds.
+            // Approximate 鈥渁ny part enters the cone鈥?by checking several points on the collider bounds.
             // This is intentionally generous for long platforms.
             Vector2[] points =
             {
@@ -464,29 +467,6 @@ namespace StrangePlaces.DemoQuantumCollapse
                     receiver.SetEntanglementObserved(observed);
                 }
             }
-        }
-
-        private void CreateLineRenderers()
-        {
-            _leftLine = CreateLineRenderer("ConeLeft");
-            _rightLine = CreateLineRenderer("ConeRight");
-            _centerLine = CreateLineRenderer("ConeCenter");
-        }
-
-        private LineRenderer CreateLineRenderer(string name)
-        {
-            GameObject go = new(name);
-            go.transform.SetParent(transform, false);
-            LineRenderer lr = go.AddComponent<LineRenderer>();
-            lr.positionCount = 2;
-            lr.startWidth = 0.03f;
-            lr.endWidth = 0.01f;
-            lr.numCapVertices = 2;
-            lr.useWorldSpace = true;
-            lr.material = new Material(Shader.Find("Sprites/Default"));
-            lr.startColor = coneColor;
-            lr.endColor = coneColor;
-            return lr;
         }
 
         private void SetConeVisible(bool visible)

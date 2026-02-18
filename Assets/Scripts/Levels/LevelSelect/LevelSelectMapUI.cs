@@ -55,6 +55,9 @@ namespace StrangePlaces.DemoQuantumCollapse
         [Tooltip("自动从 Build Settings 读取关卡场景并生成节点（推荐，便于后续扩展）。")]
         [SerializeField] private bool autoGenerateFromBuildSettings = true;
 
+        [Tooltip("是否允许在运行时重建 UI（会创建对象/调整布局）。关闭后，运行时将完全以场景中的静态 UI 为准。")]
+        [SerializeField] private bool rebuildInPlayMode = false;
+
         [Tooltip("每行最多多少关（用于蛇形布局）。")]
         [SerializeField, Range(2, 8)] private int levelsPerRow = 4;
 
@@ -90,13 +93,120 @@ namespace StrangePlaces.DemoQuantumCollapse
         private void OnEnable()
         {
             EnsureDefaults();
-            Rebuild();
+            if (Application.isPlaying && !rebuildInPlayMode)
+            {
+                BindExistingNodeButtons();
+                return;
+            }
+
+            if (!Application.isPlaying || rebuildInPlayMode)
+            {
+                Rebuild();
+            }
         }
 
         private void OnValidate()
         {
             EnsureDefaults();
-            Rebuild();
+            if (!Application.isPlaying || rebuildInPlayMode)
+            {
+                Rebuild();
+            }
+        }
+
+        private void BindExistingNodeButtons()
+        {
+            if (rootPanel == null)
+            {
+                Canvas canvas = FindFirstObjectByType<Canvas>();
+                if (canvas != null)
+                {
+                    Transform panel = canvas.transform.Find("关卡面板");
+                    if (panel != null)
+                    {
+                        rootPanel = panel as RectTransform;
+                    }
+                }
+            }
+
+            if (rootPanel == null)
+            {
+                Debug.LogError("[选关] rootPanel 未配置，无法绑定关卡节点按钮。");
+                return;
+            }
+
+            if (nodes == null || nodes.Length == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                LevelNode node = nodes[i];
+                if (node == null || string.IsNullOrWhiteSpace(node.id))
+                {
+                    continue;
+                }
+
+                string id = node.id.Trim();
+                string nodeObjectName = $"节点_{id}";
+                Transform nodeT = FindDeepChild(rootPanel, nodeObjectName);
+                if (nodeT == null)
+                {
+                    nodeT = FindDeepChild(rootPanel, id);
+                }
+
+                if (nodeT == null)
+                {
+                    continue;
+                }
+
+                Button btn = nodeT.GetComponent<Button>();
+                if (btn == null)
+                {
+                    continue;
+                }
+
+                btn.onClick.RemoveAllListeners();
+                string sceneName = node.sceneName != null ? node.sceneName.Trim() : "";
+                bool interactable = node.unlocked && !string.IsNullOrWhiteSpace(sceneName);
+                btn.interactable = interactable;
+                if (interactable)
+                {
+                    string sn = sceneName;
+                    btn.onClick.AddListener(() => SceneManager.LoadScene(sn));
+                }
+            }
+        }
+
+        private static Transform FindDeepChild(Transform root, string name)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            for (int i = 0; i < root.childCount; i++)
+            {
+                Transform child = root.GetChild(i);
+                if (child == null)
+                {
+                    continue;
+                }
+
+                if (string.Equals(child.name, name, StringComparison.Ordinal))
+                {
+                    return child;
+                }
+
+                Transform found = FindDeepChild(child, name);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
         }
 
         private void EnsureDefaults()
@@ -325,6 +435,11 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void Rebuild()
         {
+            if (Application.isPlaying && !rebuildInPlayMode)
+            {
+                return;
+            }
+
             if (rootPanel == null)
             {
                 Canvas canvas = FindFirstObjectByType<Canvas>();
@@ -346,6 +461,12 @@ namespace StrangePlaces.DemoQuantumCollapse
             Image bg = rootPanel.GetComponent<Image>();
             if (bg == null)
             {
+                if (Application.isPlaying)
+                {
+                    Debug.LogError("[关卡地图] rootPanel 缺少 Image，请在场景中手动配置（已禁止运行时自动补组件）。");
+                    return;
+                }
+
                 bg = rootPanel.gameObject.AddComponent<Image>();
             }
             bg.color = backgroundColor;
@@ -588,6 +709,13 @@ namespace StrangePlaces.DemoQuantumCollapse
                 // Avoid DestroyImmediate during restricted callbacks (e.g. OnValidate).
                 UnityEditor.EditorApplication.delayCall += () =>
                 {
+                    // Editor delayCall may run after entering Play Mode (especially when domain/scene reload is disabled).
+                    // Never perform editor-time cleanup while playing, otherwise scene UI may "disappear a few frames later".
+                    if (Application.isPlaying)
+                    {
+                        return;
+                    }
+
                     if (go != null)
                     {
                         DestroyImmediate(go);
