@@ -10,6 +10,8 @@ namespace StrangePlaces.DemoQuantumCollapse
     {
         private const string LevelSelectPath = "Assets/Scenes/LevelSelect.unity";
         private const string DemoPath = "Assets/Scenes/QuantumCollapseDemo.unity";
+        private const string Level2Path = "Assets/Scenes/Level2_NegativeMassBox.unity";
+        private const string Level3Path = "Assets/Scenes/Level3_Color.unity";
 
         static DemoQuantumCollapseBuildSettings()
         {
@@ -28,10 +30,14 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             EnsurePresent(scenes, LevelSelectPath, enabled: true);
             EnsurePresent(scenes, DemoPath, enabled: true);
+            EnsurePresent(scenes, Level2Path, enabled: true);
+            EnsurePresent(scenes, Level3Path, enabled: true);
 
             scenes = scenes
                 .OrderBy(s => s.path != LevelSelectPath)
                 .ThenBy(s => s.path != DemoPath)
+                .ThenBy(s => s.path != Level2Path)
+                .ThenBy(s => s.path != Level3Path)
                 .ThenBy(s => s.path)
                 .ToList();
 
