@@ -34,6 +34,7 @@ namespace StrangePlaces.DemoQuantumCollapse
         [Header("Respawn")]
         [SerializeField] private float fallY = -12f;
 
+        public bool isG;
         private Rigidbody2D _rigidbody2D;
         private Collider2D _collider2D;
         private Vector3 _spawnPosition;
@@ -80,7 +81,10 @@ namespace StrangePlaces.DemoQuantumCollapse
             // Drive towards desired horizontal speed using forces so collisions/impulses can push the player.
             float accel = (desiredVx - currentVx) * gain;
             float forceX = Mathf.Clamp(accel * _rigidbody2D.mass, -maxForce, maxForce);
-            _rigidbody2D.AddForce(new Vector2(forceX, 0f), ForceMode2D.Force);
+            if (!Physics2D.Raycast(_rigidbody2D.position, forceX > 0 ? Vector2.right : Vector2.left, 0.5f, 1 << 0))
+            {
+                _rigidbody2D.AddForce(new Vector2(forceX, 0f), ForceMode2D.Force);
+            }
 
             ApplyJumpForces();
         }
@@ -125,6 +129,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 }
 
                 _jumpHoldRemaining = Mathf.Max(0f, _jumpHoldRemaining - Time.fixedDeltaTime);
+                return;
             }
             else if (!jumpHeld)
             {
@@ -150,7 +155,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 if (fall > 0.0001f)
                 {
                     Vector2 g = Physics2D.gravity * _rigidbody2D.gravityScale;
-                    _rigidbody2D.AddForce(g * (_rigidbody2D.mass * fall), ForceMode2D.Force);
+                     _rigidbody2D.AddForce(g * (_rigidbody2D.mass * fall), ForceMode2D.Force);
                 }
             }
 
@@ -196,10 +201,12 @@ namespace StrangePlaces.DemoQuantumCollapse
                         continue;
                     }
 
+                    isG = true;
                     return true;
                 }
             }
 
+            isG = false;
             return false;
         }
 
