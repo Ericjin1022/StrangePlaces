@@ -54,35 +54,35 @@
 
 ## 5. 关键脚本与职责
 
-- `Assets/DemoQuantumCollapse/Scripts/PlayerController2D.cs`
+- `Assets/Scripts/Common/PlayerController2D.cs`
   - 2D 移动/跳跃/重生
   - 已修复：地面检测不再命中自身碰撞体导致“无限连跳”
 
-- `Assets/DemoQuantumCollapse/Scripts/ObserverCone2D.cs`
+- `Assets/Scripts/Common/ObserverCone2D.cs`
   - 光锥观测判定（角度/距离/遮挡）
   - 支持宽限期（`observationGraceSeconds`）减少闪烁
   - 已修复：宽限期时间戳刷新导致“被照过就永远稳定”的逻辑错误
   - 纠缠：仅信标触发纠缠组稳定
 
-- `Assets/DemoQuantumCollapse/Scripts/QuantumCollapseObservable.cs`
+- `Assets/Scripts/Levels/QuantumCollapseDemo/QuantumCollapseObservable.cs`
   - 量子平台：候选位置切换、观测坍缩、碰撞体 Trigger/非 Trigger 切换
   - 新增：`allowDirectObservation`（可让某些平台“不能被直接观测坍缩”，只能通过纠缠等外部机制稳定）
   - 新增：支持纠缠强制稳定（`IEntanglementReceiver`）
 
-- `Assets/DemoQuantumCollapse/Scripts/QuantumDoorObservable.cs`
+- `Assets/Scripts/Levels/QuantumCollapseDemo/QuantumDoorObservable.cs`
   - 量子门：观测/不观测下的开关行为
 
-- `Assets/DemoQuantumCollapse/Scripts/QuantumEntanglementMember.cs`
+- `Assets/Scripts/Levels/QuantumCollapseDemo/QuantumEntanglementMember.cs`
   - 纠缠分组键 `entanglementKey`（同 key 的对象视为同组）
 
-- `Assets/DemoQuantumCollapse/Scripts/QuantumEntanglementBeacon.cs`
+- `Assets/Scripts/Levels/QuantumCollapseDemo/QuantumEntanglementBeacon.cs`
   - 信标标记组件：仅带该标记的对象可触发纠缠组稳定
 
-- `Assets/DemoQuantumCollapse/Scripts/DemoSign.cs`
+- `Assets/Scripts/Levels/QuantumCollapseDemo/DemoSign.cs`
   - 场景内牌子生成与文本显示（固定中文提示）
   - 已处理：避免在不合适的生命周期使用 `DestroyImmediate` 引发停止时警告
 
-- `Assets/DemoQuantumCollapse/Scripts/FlashlightConeVisual2D.cs`
+- `Assets/Scripts/Common/FlashlightConeVisual2D.cs`
   - 手电筒光锥 Mesh 生成与朝向驱动
   - Build 兼容：优先从 `Resources` 加载材质模板，避免 shader stripping 导致打包后不可见
 
@@ -92,7 +92,7 @@
 
 处理方式：
 
-- 新增材质模板：`Assets/DemoQuantumCollapse/Resources/FlashlightCone2D_Mat.mat`
+- 新增材质模板：`Assets/Resources/FlashlightCone2D_Mat.mat`
 - `FlashlightConeVisual2D` 在运行时 `Resources.Load` 材质并克隆实例，确保 Build 时 shader/材质被打包
 
 ## 7. 已修复问题清单（近期）
@@ -111,4 +111,3 @@
   - 更明确的失败反馈（例如掉落时的中文提示/音效/短暂慢动作）
   - 增加“遮挡窗口/窥视缝隙”让抬头观测更有路线规划感
   - 将 `docs/plan.md` 中的文本编码问题统一为 UTF-8（当前出现乱码）
-

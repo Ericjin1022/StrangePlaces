@@ -235,8 +235,19 @@ namespace StrangePlaces.DemoQuantumCollapse
             if (debugLogging)
             {
                 GameObject mediumGo = !string.IsNullOrWhiteSpace(debugTargetName) ? GameObject.Find(debugTargetName) : null;
-                FermatSpeedMedium2D medium = mediumGo != null ? mediumGo.GetComponent<FermatSpeedMedium2D>() : null;
-                bool mediumIsTarget = medium != null && medium is IObservationTarget;
+                MonoBehaviour[] mediumBehaviours = mediumGo != null ? mediumGo.GetComponents<MonoBehaviour>() : null;
+                bool mediumIsTarget = false;
+                if (mediumBehaviours != null)
+                {
+                    for (int i = 0; i < mediumBehaviours.Length; i++)
+                    {
+                        if (mediumBehaviours[i] is IObservationTarget)
+                        {
+                            mediumIsTarget = true;
+                            break;
+                        }
+                    }
+                }
 
                 int hash = 17;
                 for (int i = 0; i < _targets.Length; i++)

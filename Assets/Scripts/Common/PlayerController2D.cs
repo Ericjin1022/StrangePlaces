@@ -81,7 +81,31 @@ namespace StrangePlaces.DemoQuantumCollapse
             // Drive towards desired horizontal speed using forces so collisions/impulses can push the player.
             float accel = (desiredVx - currentVx) * gain;
             float forceX = Mathf.Clamp(accel * _rigidbody2D.mass, -maxForce, maxForce);
-            if (!Physics2D.Raycast(_rigidbody2D.position, forceX > 0 ? Vector2.right : Vector2.left, 0.5f, 1 << 0))
+
+            bool blocked = false;
+            if (_collider2D != null && Mathf.Abs(forceX) > 0.0001f)
+            {
+                Vector2 dir = forceX > 0f ? Vector2.right : Vector2.left;
+
+                ContactFilter2D filter = new ContactFilter2D();
+                filter.useTriggers = false;
+                filter.SetLayerMask(groundMask);
+
+                int hitCount = _collider2D.Cast(dir, filter, _groundHits, 0.05f);
+                for (int i = 0; i < hitCount; i++)
+                {
+                    Collider2D hitCollider = _groundHits[i].collider;
+                    if (hitCollider == null || hitCollider == _collider2D)
+                    {
+                        continue;
+                    }
+
+                    blocked = true;
+                    break;
+                }
+            }
+
+            if (!blocked)
             {
                 _rigidbody2D.AddForce(new Vector2(forceX, 0f), ForceMode2D.Force);
             }

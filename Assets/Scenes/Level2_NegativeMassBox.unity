@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!29 &1
 OcclusionCullingSettings:
@@ -1442,27 +1442,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1992691551}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &212017144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 212017142}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28569d8e25ab8744785199255a197f49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nodeStartName: Node_Start
-  nodeTop1Name: Node_Top1
-  nodeTop2Name: Node_Top2
-  nodeBottomName: Node_Bottom
-  nodeGoalName: Node_Goal
-  mediumName: SpeedMedium
-  probeName: Probe
-  fastEdgeMultiplier: 1.75
-  debugLogs: 0
 --- !u!114 &212017145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1477,32 +1456,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelSelectSceneName: LevelSelect
   key: 27
---- !u!114 &212017146
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 212017142}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 048daeb95d26e684ab3c93469c4d1eb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  probe: {fileID: 0}
---- !u!114 &212017147
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 212017142}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e9d7ba7331a6ea429fba550559841cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  title: "\u7B2C\u4E8C\u5173\uFF1A\u8D39\u5C14\u9A6C\u6700\u5C11\u65F6\u95F4\u539F\u7406\uFF08\u6F14\u793A\uFF09"
 --- !u!114 &212017148
 MonoBehaviour:
   m_ObjectHideFlags: 0
