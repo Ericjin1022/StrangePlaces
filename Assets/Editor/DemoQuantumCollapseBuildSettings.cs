@@ -9,7 +9,7 @@ namespace StrangePlaces.DemoQuantumCollapse
     public static class DemoQuantumCollapseBuildSettings
     {
         private const string LevelSelectPath = "Assets/Scenes/LevelSelect.unity";
-        private const string DemoPath = "Assets/Scenes/QuantumCollapseDemo.unity";
+        private const string Level1Path = "Assets/Scenes/Level1_QuantumCollapse.unity";
         private const string Level2Path = "Assets/Scenes/Level2_NegativeMassBox.unity";
         private const string Level3Path = "Assets/Scenes/Level3_Color.unity";
 
@@ -28,20 +28,62 @@ namespace StrangePlaces.DemoQuantumCollapse
         {
             List<EditorBuildSettingsScene> scenes = EditorBuildSettings.scenes?.ToList() ?? new List<EditorBuildSettingsScene>();
 
+            scenes = PruneMissingScenes(scenes);
+
             EnsurePresent(scenes, LevelSelectPath, enabled: true);
-            EnsurePresent(scenes, DemoPath, enabled: true);
+            EnsurePresent(scenes, Level1Path, enabled: true);
             EnsurePresent(scenes, Level2Path, enabled: true);
             EnsurePresent(scenes, Level3Path, enabled: true);
 
             scenes = scenes
                 .OrderBy(s => s.path != LevelSelectPath)
-                .ThenBy(s => s.path != DemoPath)
+                .ThenBy(s => s.path != Level1Path)
                 .ThenBy(s => s.path != Level2Path)
                 .ThenBy(s => s.path != Level3Path)
                 .ThenBy(s => s.path)
                 .ToList();
 
             EditorBuildSettings.scenes = scenes.ToArray();
+        }
+
+        private static List<EditorBuildSettingsScene> PruneMissingScenes(List<EditorBuildSettingsScene> scenes)
+        {
+            if (scenes == null || scenes.Count == 0)
+            {
+                return scenes ?? new List<EditorBuildSettingsScene>();
+            }
+
+            HashSet<string> seen = new HashSet<string>();
+            List<EditorBuildSettingsScene> kept = new List<EditorBuildSettingsScene>(scenes.Count);
+            for (int i = 0; i < scenes.Count; i++)
+            {
+                EditorBuildSettingsScene s = scenes[i];
+                if (s == null)
+                {
+                    continue;
+                }
+
+                string path = s.path ?? "";
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    continue;
+                }
+
+                // Drop missing assets (e.g. renamed scenes left behind in Build Settings).
+                if (string.IsNullOrWhiteSpace(AssetDatabase.AssetPathToGUID(path)))
+                {
+                    continue;
+                }
+
+                if (!seen.Add(path))
+                {
+                    continue;
+                }
+
+                kept.Add(s);
+            }
+
+            return kept;
         }
 
         private static void EnsurePresent(List<EditorBuildSettingsScene> scenes, string path, bool enabled)
@@ -69,3 +111,4 @@ namespace StrangePlaces.DemoQuantumCollapse
     }
 }
 #endif
+
