@@ -6,25 +6,25 @@ namespace StrangePlaces.DemoQuantumCollapse
     public sealed class QuantumCollapseObservable : MonoBehaviour, IObservationTarget, IEntanglementReceiver
     {
         [Header("Superposition (Unobserved)")]
-        [SerializeField] private Vector2[] possibleWorldPositions = new Vector2[2];
-        [SerializeField] private float switchIntervalSeconds = 0.18f;
+        [Tooltip("Unobserved: each switch picks a random offset around the initial position.")]
+        [SerializeField, Min(0f)] private float randomPositionRange = 0.5f;
+        [SerializeField, Min(0.01f)] private float switchIntervalSeconds = 0.18f;
         [SerializeField] private float wobblePositionAmplitude = 0.05f;
         [SerializeField] private float wobbleScaleAmplitude = 0.08f;
         [SerializeField] private float wobbleSpeed = 10f;
 
         [Header("Collapse (Observed)")]
-        [Tooltip("关闭后：即使光锥直接照到本体，也不会坍缩；只能通过纠缠/其它外部机制使其进入稳定态。")]
+        [Tooltip("If false: direct flashlight observation will not collapse this object.")]
         [SerializeField] private bool allowDirectObservation = true;
         [SerializeField] private bool solidOnlyWhenObserved = true;
 
-        [Header("外观")]
-        [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 来表现“量子态/稳定态”。")]
+        [Header("Visual")]
+        [Tooltip("If true, swap SpriteRenderer.sprite to represent observed/unobserved.")]
         [SerializeField] private bool driveSpriteSwap = true;
         [SerializeField] private Sprite unobservedSprite;
         [SerializeField] private Sprite observedSprite;
-        [Tooltip("切换 Sprite 时，是否将 SpriteRenderer.color 归一为白色，避免被旧的染色影响。")]
+        [Tooltip("When swapping sprites, optionally reset SpriteRenderer.color to white.")]
         [SerializeField] private bool resetColorToWhiteWhenSwapping = true;
-
 
         private Collider2D[] _colliders2D = System.Array.Empty<Collider2D>();
         private SpriteRenderer[] _spriteRenderers = System.Array.Empty<SpriteRenderer>();
@@ -32,27 +32,26 @@ namespace StrangePlaces.DemoQuantumCollapse
         private bool _directObserved;
         private bool _entanglementObserved;
         private bool _effectiveObserved;
-        private int _index;
         private float _nextSwitchTime;
         private Vector3 _baseScale;
+        private Vector3 _basePosition;
+        private Vector2 _currentOffset;
 
         public Vector2 ObservationPoint => transform.position;
         public Collider2D PrimaryCollider => _colliders2D != null && _colliders2D.Length > 0 ? _colliders2D[0] : null;
 
         private void Awake()
         {
+            _basePosition = transform.position;
             _baseScale = transform.localScale;
 
             _colliders2D = GetComponentsInChildren<Collider2D>(true);
             _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
 
-            if (possibleWorldPositions == null || possibleWorldPositions.Length == 0)
-            {
-                possibleWorldPositions = new[] { (Vector2)transform.position };
-            }
-
-            _index = 0;
+            _currentOffset = Vector2.zero;
+            PickNewOffset();
             _nextSwitchTime = Time.time + switchIntervalSeconds;
+
             ApplyVisuals();
         }
 
@@ -63,27 +62,23 @@ namespace StrangePlaces.DemoQuantumCollapse
                 return;
             }
 
-            if (possibleWorldPositions.Length > 1 && Time.time >= _nextSwitchTime)
+            if (Time.time >= _nextSwitchTime)
             {
-                _index = (_index + 1) % possibleWorldPositions.Length;
                 _nextSwitchTime = Time.time + switchIntervalSeconds;
+                PickNewOffset();
             }
 
-            Vector2 target = possibleWorldPositions[Mathf.Clamp(_index, 0, possibleWorldPositions.Length - 1)];
             float wobble = Mathf.Sin(Time.time * wobbleSpeed);
-            Vector2 wobbleOffset = new(wobble * wobblePositionAmplitude, Mathf.Cos(Time.time * wobbleSpeed * 1.3f) * wobblePositionAmplitude);
+            Vector2 wobbleOffset = new(
+                wobble * wobblePositionAmplitude,
+                Mathf.Cos(Time.time * wobbleSpeed * 1.3f) * wobblePositionAmplitude
+            );
+
+            Vector2 target = (Vector2)_basePosition + _currentOffset;
             transform.position = (Vector3)(target + wobbleOffset);
 
             float scaleWobble = 1f + wobble * wobbleScaleAmplitude;
             transform.localScale = _baseScale * scaleWobble;
-
-        }
-
-        public void SetPossibleWorldPositions(Vector2[] positions)
-        {
-            possibleWorldPositions = positions != null && positions.Length > 0 ? positions : new[] { (Vector2)transform.position };
-            _index = 0;
-            _nextSwitchTime = Time.time + switchIntervalSeconds;
         }
 
         public void SetObserved(bool observed)
@@ -136,13 +131,14 @@ namespace StrangePlaces.DemoQuantumCollapse
             _effectiveObserved = observedNow;
             if (_effectiveObserved)
             {
-                Vector2 collapsed = possibleWorldPositions[Mathf.Clamp(_index, 0, possibleWorldPositions.Length - 1)];
-                transform.position = collapsed;
+                _currentOffset = Vector2.zero;
+                transform.position = _basePosition;
                 transform.localScale = _baseScale;
             }
             else
             {
                 _nextSwitchTime = Time.time + switchIntervalSeconds;
+                PickNewOffset();
             }
 
             ApplyVisuals(_effectiveObserved);
@@ -207,6 +203,17 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
         }
 
+        private void PickNewOffset()
+        {
+            float r = Mathf.Max(0f, randomPositionRange);
+            if (r <= 0.0001f)
+            {
+                _currentOffset = Vector2.zero;
+                return;
+            }
+
+            _currentOffset = new Vector2(Random.Range(-r, r), Random.Range(-r, r));
+        }
     }
 }
 
