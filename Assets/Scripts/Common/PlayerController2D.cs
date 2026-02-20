@@ -239,6 +239,7 @@ namespace StrangePlaces.DemoQuantumCollapse
             Camera camera = Camera.main;
             if (camera == null)
             {
+                WarnMissingMainCamera();
                 return;
             }
 
@@ -252,6 +253,19 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
 
             AimDirection = toMouse.normalized;
+        }
+
+        private bool _warnedMissingMainCamera;
+
+        private void WarnMissingMainCamera()
+        {
+            if (_warnedMissingMainCamera)
+            {
+                return;
+            }
+
+            _warnedMissingMainCamera = true;
+            Debug.LogWarning("[玩家] 未找到带 MainCamera 标签的相机（Camera.main 为空），无法用鼠标更新朝向。请检查相机的 Tag 是否为 MainCamera。", this);
         }
 
         public void SetSpawnPosition(Vector3 newSpawnPosition)

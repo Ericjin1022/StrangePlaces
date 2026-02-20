@@ -24,14 +24,43 @@ namespace StrangePlaces.DemoQuantumCollapse
         [SerializeField] private PlayerController2D player;
 
         private MeshRenderer _meshRenderer;
+        private bool _warnedMissingPlayer;
+
+        private void Awake()
+        {
+            _meshRenderer = GetComponent<MeshRenderer>();
+            WarnIfMissingPlayer();
+        }
 
         private void LateUpdate()
         {
+            if (!WarnIfMissingPlayer())
+            {
+                return;
+            }
+
             Vector2 aim = player != null ? player.AimDirection : (Vector2)transform.right;
             if (aim.sqrMagnitude > 0.001f)
             {
                 transform.right = new Vector3(aim.x, aim.y, 0f);
             }
+        }
+
+        private bool WarnIfMissingPlayer()
+        {
+            if (player != null)
+            {
+                return true;
+            }
+
+            if (_warnedMissingPlayer)
+            {
+                return false;
+            }
+
+            _warnedMissingPlayer = true;
+            Debug.LogWarning("[手电筒] FlashlightConeVisual2D 未绑定 player，请在 Inspector 中把玩家上的 PlayerController2D 拖到此字段。", this);
+            return false;
         }
 
         public void SetPlayer(PlayerController2D newPlayer)

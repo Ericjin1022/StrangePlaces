@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/LevelSelect.unity
     guid: 126dd49407bbd874b8d7e9067ae1f907
   - enabled: 1
-    path: Assets/Scenes/QuantumCollapseDemo.unity
+    path: Assets/Scenes/Level1_QuantumCollapse.unity
     guid: 15547a9d80d921d4395c1a164162a99b
   - enabled: 1
     path: Assets/Scenes/Level2_NegativeMassBox.unity

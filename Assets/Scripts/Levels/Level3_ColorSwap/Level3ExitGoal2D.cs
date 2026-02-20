@@ -41,7 +41,7 @@ namespace StrangePlaces.Level3_ColorSwap
             Level3HUD hud = FindFirstObjectByType<Level3HUD>();
             if (hud == null)
             {
-                Debug.LogWarning("[第三关] 已到达出口，但场景中未找到 Level3HUD，无法显示通关界面。");
+                Debug.LogWarning("[第三关] 已到达出口，但场景中未找到 Level3HUD，无法显示通关界面。", this);
                 return;
             }
 

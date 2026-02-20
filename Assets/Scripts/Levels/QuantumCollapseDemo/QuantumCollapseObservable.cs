@@ -19,9 +19,10 @@ namespace StrangePlaces.DemoQuantumCollapse
         [SerializeField] private Color unobservedColor = new(0.9f, 0.3f, 1f, 1f);
         [SerializeField] private Color observedColor = new(1f, 1f, 1f, 1f);
 
-        private Collider2D _collider2D;
-        private Renderer _renderer;
-        private Material _materialInstance;
+        private Collider2D[] _colliders2D = System.Array.Empty<Collider2D>();
+        private SpriteRenderer[] _spriteRenderers = System.Array.Empty<SpriteRenderer>();
+        private Renderer[] _otherRenderers = System.Array.Empty<Renderer>();
+        private MaterialPropertyBlock _mpb;
 
         private bool _directObserved;
         private bool _entanglementObserved;
@@ -31,19 +32,16 @@ namespace StrangePlaces.DemoQuantumCollapse
         private Vector3 _baseScale;
 
         public Vector2 ObservationPoint => transform.position;
-        public Collider2D PrimaryCollider => _collider2D;
+        public Collider2D PrimaryCollider => _colliders2D != null && _colliders2D.Length > 0 ? _colliders2D[0] : null;
 
         private void Awake()
         {
-            _collider2D = GetComponent<Collider2D>();
-            _renderer = GetComponent<Renderer>();
             _baseScale = transform.localScale;
 
-            if (_renderer != null)
-            {
-                _materialInstance = new Material(Shader.Find("Sprites/Default"));
-                _renderer.sharedMaterial = _materialInstance;
-            }
+            _colliders2D = GetComponentsInChildren<Collider2D>(true);
+            _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+            _otherRenderers = GetComponentsInChildren<Renderer>(true);
+            _mpb = new MaterialPropertyBlock();
 
             if (possibleWorldPositions == null || possibleWorldPositions.Length == 0)
             {
@@ -76,12 +74,9 @@ namespace StrangePlaces.DemoQuantumCollapse
             float scaleWobble = 1f + wobble * wobbleScaleAmplitude;
             transform.localScale = _baseScale * scaleWobble;
 
-            if (_materialInstance != null)
-            {
-                float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * wobbleSpeed * 0.7f);
-                pulse = Mathf.Clamp01(pulse);
-                _materialInstance.color = Color.Lerp(unobservedColor * 0.6f, unobservedColor, pulse);
-            }
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * wobbleSpeed * 0.7f);
+            pulse = Mathf.Clamp01(pulse);
+            ApplyColor(Color.Lerp(unobservedColor * 0.6f, unobservedColor, pulse));
         }
 
         public void SetPossibleWorldPositions(Vector2[] positions)
@@ -120,7 +115,7 @@ namespace StrangePlaces.DemoQuantumCollapse
                 return false;
             }
 
-            return collider == _collider2D || collider.transform.IsChildOf(transform);
+            return collider.transform.IsChildOf(transform);
         }
 
         private bool ComputeEffectiveObserved()
@@ -160,15 +155,59 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void ApplyVisuals(bool observed)
         {
-            if (_collider2D != null && solidOnlyWhenObserved)
+            if (solidOnlyWhenObserved && _colliders2D != null && _colliders2D.Length > 0)
             {
-                _collider2D.enabled = true;
-                _collider2D.isTrigger = !observed;
+                for (int i = 0; i < _colliders2D.Length; i++)
+                {
+                    Collider2D c = _colliders2D[i];
+                    if (c == null)
+                    {
+                        continue;
+                    }
+
+                    c.enabled = true;
+                    c.isTrigger = !observed;
+                }
             }
 
-            if (_materialInstance != null)
+            ApplyColor(observed ? observedColor : unobservedColor);
+        }
+
+        private void ApplyColor(Color color)
+        {
+            if (_spriteRenderers != null && _spriteRenderers.Length > 0)
             {
-                _materialInstance.color = observed ? observedColor : unobservedColor;
+                for (int i = 0; i < _spriteRenderers.Length; i++)
+                {
+                    if (_spriteRenderers[i] != null)
+                    {
+                        _spriteRenderers[i].color = color;
+                    }
+                }
+
+                return;
+            }
+
+            if (_otherRenderers == null || _otherRenderers.Length == 0)
+            {
+                return;
+            }
+
+            if (_mpb == null)
+            {
+                _mpb = new MaterialPropertyBlock();
+            }
+
+            _mpb.Clear();
+            _mpb.SetColor("_Color", color);
+            _mpb.SetColor("_BaseColor", color);
+            for (int i = 0; i < _otherRenderers.Length; i++)
+            {
+                Renderer r = _otherRenderers[i];
+                if (r != null)
+                {
+                    r.SetPropertyBlock(_mpb);
+                }
             }
         }
     }

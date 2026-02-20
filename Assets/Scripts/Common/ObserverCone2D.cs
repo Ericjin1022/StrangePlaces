@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -20,10 +20,22 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         [Header("Debug Visual")]
         [SerializeField] private bool showDebugLines = false;
+        [SerializeField] private bool showDebugConeGizmos = false;
+        [SerializeField, Range(6, 128)] private int debugConeArcSegments = 36;
+        [SerializeField] private Color debugConeGizmoColor = new(1f, 0.95f, 0.25f, 0.35f);
+        [SerializeField] private bool showDebugSamplePoints = false;
+        [SerializeField] private Color debugSamplePointColor = new(0.25f, 1f, 0.65f, 0.95f);
+        [SerializeField, Range(0.01f, 0.25f)] private float debugSamplePointRadius = 0.05f;
 
         [Header("Line of Sight")]
         [SerializeField] private bool requireLineOfSight = true;
         [SerializeField] private LayerMask raycastMask = ~0;
+        [Tooltip("为 true 时，射线遮挡检测会忽略非目标的 Trigger（常用于避免触发器体积挡光）。注意：如果目标本身是 Trigger，仍然会被当作可观察对象。")]
+        [SerializeField] private bool ignoreTriggerOccluders = true;
+
+        [Header("Line of Sight Sampling")]
+        [Tooltip("射线采样点数量（越大越不容易漏判“擦边可见”，但开销更高）。")]
+        [SerializeField, Range(4, 64)] private int lineOfSightPerimeterSamples = 20;
 
         [Header("Visual")]
         [SerializeField] private Color coneColor = new(1f, 1f, 0.3f, 1f);
@@ -39,6 +51,9 @@ namespace StrangePlaces.DemoQuantumCollapse
         private readonly Dictionary<IObservationTarget, bool> _lastObservedState = new();
         private readonly Dictionary<IObservationTarget, string> _entanglementKeyByTarget = new();
         private readonly HashSet<IObservationTarget> _entanglementBeacons = new();
+        private readonly RaycastHit2D[] _rayHits = new RaycastHit2D[32];
+        private readonly List<Collider2D> _colliderCache = new();
+        private readonly List<Collider2D> _ownedColliderCache = new();
 
         private int _lastTargetsHash;
         private float _nextDebugTime;
@@ -47,7 +62,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void Awake()
         {
-            _player = GetComponent<PlayerController2D>();
+            _player = GetComponentInParent<PlayerController2D>();
             _selfCollider = GetComponent<Collider2D>();
             if (showDebugLines)
             {
@@ -347,53 +362,78 @@ namespace StrangePlaces.DemoQuantumCollapse
                 }
             }
         }
-
         private bool IsObserved(Vector2 origin, Vector2 aimDir, float halfAngle, IObservationTarget target)
         {
-            Collider2D targetCollider = target.PrimaryCollider;
-            if (targetCollider == null)
+            int samples = Mathf.Clamp(lineOfSightPerimeterSamples, 4, 64);
+
+            int ownedCount = GetOwnedColliders(target, _ownedColliderCache);
+            if (ownedCount <= 0)
             {
                 return IsObservedAtPoint(origin, aimDir, halfAngle, target, target.ObservationPoint);
             }
 
-            Bounds b = targetCollider.bounds;
-            Vector2 c = b.center;
-            Vector2 min = b.min;
-            Vector2 max = b.max;
-
-            // Approximate 鈥渁ny part enters the cone鈥?by checking several points on the collider bounds.
-            // This is intentionally generous for long platforms.
-            Vector2[] points =
+            for (int cIndex = 0; cIndex < ownedCount; cIndex++)
             {
-                c,
-                new Vector2(min.x, c.y),
-                new Vector2(max.x, c.y),
-                new Vector2(c.x, min.y),
-                new Vector2(c.x, max.y),
-                new Vector2(min.x, min.y),
-                new Vector2(min.x, max.y),
-                new Vector2(max.x, min.y),
-                new Vector2(max.x, max.y),
-            };
+                Collider2D collider = _ownedColliderCache[cIndex];
+                if (collider == null)
+                {
+                    continue;
+                }
 
-            for (int i = 0; i < points.Length; i++)
-            {
-                if (IsObservedAtPoint(origin, aimDir, halfAngle, target, points[i]))
+                Bounds b = collider.bounds;
+                if (IsObservedAtPoint(origin, aimDir, halfAngle, target, b.center))
+                {
+                    return true;
+                }
+
+                Vector2[] perimeter = GetBoundsPerimeterSamples(b, samples);
+                for (int i = 0; i < perimeter.Length; i++)
+                {
+                    if (IsObservedAtPoint(origin, aimDir, halfAngle, target, perimeter[i]))
+                    {
+                        return true;
+                    }
+                }
+
+                Vector2 closest = collider.ClosestPoint(origin);
+                if ((closest - origin).sqrMagnitude > 0.0001f && IsObservedAtPoint(origin, aimDir, halfAngle, target, closest))
                 {
                     return true;
                 }
             }
 
-            // Fallback: closest point to the observer (handles rotated/odd shapes a bit better).
-            Vector2 closest = targetCollider.ClosestPoint(origin);
-            if ((closest - origin).sqrMagnitude > 0.0001f)
-            {
-                return IsObservedAtPoint(origin, aimDir, halfAngle, target, closest);
-            }
-
             return false;
         }
 
+        private int GetOwnedColliders(IObservationTarget target, List<Collider2D> results)
+        {
+            results.Clear();
+
+            if (target is Component component)
+            {
+                _colliderCache.Clear();
+                component.GetComponentsInChildren(true, _colliderCache);
+                for (int i = 0; i < _colliderCache.Count; i++)
+                {
+                    Collider2D c = _colliderCache[i];
+                    if (c != null && target.OwnsCollider(c))
+                    {
+                        results.Add(c);
+                    }
+                }
+            }
+
+            if (results.Count == 0)
+            {
+                Collider2D primary = target.PrimaryCollider;
+                if (primary != null)
+                {
+                    results.Add(primary);
+                }
+            }
+
+            return results.Count;
+        }
         private bool IsObservedAtPoint(Vector2 origin, Vector2 aimDir, float halfAngle, IObservationTarget target, Vector2 point)
         {
             Vector2 toPoint = point - origin;
@@ -416,12 +456,13 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
 
             Vector2 rayOrigin = origin + dir * 0.15f;
-            RaycastHit2D[] hits = Physics2D.RaycastAll(rayOrigin, dir, distance, raycastMask);
             float nearest = float.PositiveInfinity;
             Collider2D nearestCollider = null;
-            for (int i = 0; i < hits.Length; i++)
+
+            int hitCount = Physics2D.RaycastNonAlloc(rayOrigin, dir, _rayHits, distance, raycastMask);
+            for (int i = 0; i < hitCount; i++)
             {
-                Collider2D collider = hits[i].collider;
+                Collider2D collider = _rayHits[i].collider;
                 if (collider == null)
                 {
                     continue;
@@ -432,9 +473,19 @@ namespace StrangePlaces.DemoQuantumCollapse
                     continue;
                 }
 
-                if (hits[i].distance < nearest)
+                if (_player != null && collider.transform.IsChildOf(_player.transform))
                 {
-                    nearest = hits[i].distance;
+                    continue;
+                }
+
+                if (ignoreTriggerOccluders && collider.isTrigger && !target.OwnsCollider(collider))
+                {
+                    continue;
+                }
+
+                if (_rayHits[i].distance < nearest)
+                {
+                    nearest = _rayHits[i].distance;
                     nearestCollider = collider;
                 }
             }
@@ -445,6 +496,48 @@ namespace StrangePlaces.DemoQuantumCollapse
             }
 
             return target.OwnsCollider(nearestCollider);
+        }
+
+        private static Vector2[] GetBoundsPerimeterSamples(Bounds b, int samples)
+        {
+            samples = Mathf.Clamp(samples, 4, 256);
+
+            Vector2 min = b.min;
+            Vector2 max = b.max;
+            float w = Mathf.Max(0.0001f, max.x - min.x);
+            float h = Mathf.Max(0.0001f, max.y - min.y);
+            float perimeter = 2f * (w + h);
+
+            Vector2[] pts = new Vector2[samples];
+            for (int i = 0; i < samples; i++)
+            {
+                float t = (i + 0.5f) / samples * perimeter;
+
+                if (t < w)
+                {
+                    pts[i] = new Vector2(min.x + t, min.y);
+                    continue;
+                }
+
+                t -= w;
+                if (t < h)
+                {
+                    pts[i] = new Vector2(max.x, min.y + t);
+                    continue;
+                }
+
+                t -= h;
+                if (t < w)
+                {
+                    pts[i] = new Vector2(max.x - t, max.y);
+                    continue;
+                }
+
+                t -= w;
+                pts[i] = new Vector2(min.x, max.y - Mathf.Min(t, h));
+            }
+
+            return pts;
         }
 
         private void SetAllObserved(bool observed)
@@ -520,5 +613,163 @@ namespace StrangePlaces.DemoQuantumCollapse
             float sin = Mathf.Sin(radians);
             return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
         }
+
+        private void OnDrawGizmos()
+        {
+            DrawDebugSamplePointsGizmos();
+
+            if (!showDebugConeGizmos)
+            {
+                return;
+            }
+
+            Vector3 origin = transform.position;
+            float distance = Mathf.Max(0.01f, maxDistance);
+
+            Vector2 aim = _player != null ? _player.AimDirection : (Vector2)transform.right;
+            if (aim.sqrMagnitude < 0.0001f)
+            {
+                aim = Vector2.right;
+            }
+            aim.Normalize();
+
+            float halfAngleRad = coneAngleDegrees * 0.5f * Mathf.Deg2Rad;
+            Vector2 leftDir = Rotate(aim, -halfAngleRad);
+            Vector2 rightDir = Rotate(aim, halfAngleRad);
+
+            Color old = Gizmos.color;
+            Gizmos.color = debugConeGizmoColor;
+
+            Gizmos.DrawLine(origin, origin + (Vector3)(leftDir * distance));
+            Gizmos.DrawLine(origin, origin + (Vector3)(rightDir * distance));
+
+            int segments = Mathf.Clamp(debugConeArcSegments, 6, 256);
+            float start = -halfAngleRad;
+            float end = halfAngleRad;
+            Vector3 prev = origin + (Vector3)(Rotate(aim, start) * distance);
+            for (int i = 1; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                float a = Mathf.Lerp(start, end, t);
+                Vector3 p = origin + (Vector3)(Rotate(aim, a) * distance);
+                Gizmos.DrawLine(prev, p);
+                prev = p;
+            }
+
+            Gizmos.color = old;
+        }
+
+        private void DrawDebugSamplePointsGizmos()
+        {
+            if (!showDebugSamplePoints)
+            {
+                return;
+            }
+
+            Color old = Gizmos.color;
+            Gizmos.color = debugSamplePointColor;
+
+            float r = Mathf.Max(0.001f, debugSamplePointRadius);
+
+            int samples = Mathf.Clamp(lineOfSightPerimeterSamples, 4, 64);
+            bool drewAny = false;
+
+            if (!string.IsNullOrWhiteSpace(debugTargetName))
+            {
+                GameObject targetGo = GameObject.Find(debugTargetName);
+                if (targetGo != null && TryFindObservationTarget(targetGo, out IObservationTarget target))
+                {
+                    DrawTargetSamplePoints(target, samples, r);
+                    drewAny = true;
+                }
+            }
+
+            if (!drewAny)
+            {
+                MonoBehaviour[] behaviours = FindObjectsOfType<MonoBehaviour>(true);
+                for (int i = 0; i < behaviours.Length; i++)
+                {
+                    MonoBehaviour mb = behaviours[i];
+                    if (mb == null)
+                    {
+                        continue;
+                    }
+
+                    if (mb is not IObservationTarget target)
+                    {
+                        continue;
+                    }
+
+                    DrawTargetSamplePoints(target, samples, r);
+                    drewAny = true;
+                }
+            }
+
+            Gizmos.color = old;
+        }
+
+        private void DrawTargetSamplePoints(IObservationTarget target, int samples, float radius)
+        {
+            int ownedCount = GetOwnedColliders(target, _ownedColliderCache);
+            if (ownedCount <= 0)
+            {
+                Gizmos.DrawSphere(target.ObservationPoint, radius);
+                return;
+            }
+
+            for (int cIndex = 0; cIndex < ownedCount; cIndex++)
+            {
+                Collider2D c = _ownedColliderCache[cIndex];
+                if (c == null)
+                {
+                    continue;
+                }
+
+                Bounds b = c.bounds;
+                Gizmos.DrawSphere(b.center, radius);
+
+                Vector2[] points = GetBoundsPerimeterSamples(b, samples);
+                for (int i = 0; i < points.Length; i++)
+                {
+                    Gizmos.DrawSphere(points[i], radius);
+                }
+            }
+        }
+
+        private static bool TryFindObservationTarget(GameObject go, out IObservationTarget target)
+        {
+            target = null;
+            if (go == null)
+            {
+                return false;
+            }
+
+            MonoBehaviour[] self = go.GetComponents<MonoBehaviour>();
+            for (int i = 0; i < self.Length; i++)
+            {
+                if (self[i] is IObservationTarget t)
+                {
+                    target = t;
+                    return true;
+                }
+            }
+
+            MonoBehaviour[] parents = go.GetComponentsInParent<MonoBehaviour>(true);
+            for (int i = 0; i < parents.Length; i++)
+            {
+                if (parents[i] is IObservationTarget t)
+                {
+                    target = t;
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
+
+
+
+
+
