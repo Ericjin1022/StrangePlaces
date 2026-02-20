@@ -15,6 +15,14 @@ namespace StrangePlaces.Level3_ColorSwap
         [SerializeField] private KeyCode toggleKey = KeyCode.E;
 
         [Header("可选：外观")]
+        [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 表现黑白变化（优先级高于颜色染色）。")]
+        [SerializeField] private bool driveSpriteSwap = true;
+        [SerializeField] private Sprite blackSprite;
+        [SerializeField] private Sprite whiteSprite;
+        [Tooltip("切换 Sprite 时，是否将 SpriteRenderer.color 归一为白色，避免被旧的染色影响。")]
+        [SerializeField] private bool resetColorToWhiteWhenSwapping = true;
+
+        [Tooltip("为 true 时，使用 SpriteRenderer.color 进行黑白染色（当 driveSpriteSwap 关闭或贴图未配置时生效）。")]
         [SerializeField] private bool driveSpriteRendererColor = true;
         [SerializeField] private SpriteRenderer spriteRenderer;
 
@@ -82,18 +90,37 @@ namespace StrangePlaces.Level3_ColorSwap
 
         private void ApplyVisual()
         {
-            if (!driveSpriteRendererColor)
-            {
-                return;
-            }
-
             if (spriteRenderer == null)
             {
                 return;
             }
 
-            spriteRenderer.color = CurrentColor.ToUnityColor();
+            BinaryColor c = CurrentColor;
+
+            if (driveSpriteSwap && (blackSprite != null || whiteSprite != null))
+            {
+                Sprite s = c == BinaryColor.Black ? blackSprite : whiteSprite;
+                if (s != null)
+                {
+                    spriteRenderer.sprite = s;
+                }
+
+                if (resetColorToWhiteWhenSwapping)
+                {
+                    spriteRenderer.color = Color.white;
+                }
+
+                return;
+            }
+
+            if (!driveSpriteRendererColor)
+            {
+                return;
+            }
+
+            spriteRenderer.color = c.ToUnityColor();
         }
     }
 }
+
 

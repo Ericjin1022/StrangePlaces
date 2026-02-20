@@ -16,13 +16,18 @@ namespace StrangePlaces.DemoQuantumCollapse
         [Tooltip("关闭后：即使光锥直接照到本体，也不会坍缩；只能通过纠缠/其它外部机制使其进入稳定态。")]
         [SerializeField] private bool allowDirectObservation = true;
         [SerializeField] private bool solidOnlyWhenObserved = true;
-        [SerializeField] private Color unobservedColor = new(0.9f, 0.3f, 1f, 1f);
-        [SerializeField] private Color observedColor = new(1f, 1f, 1f, 1f);
+
+        [Header("外观")]
+        [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 来表现“量子态/稳定态”。")]
+        [SerializeField] private bool driveSpriteSwap = true;
+        [SerializeField] private Sprite unobservedSprite;
+        [SerializeField] private Sprite observedSprite;
+        [Tooltip("切换 Sprite 时，是否将 SpriteRenderer.color 归一为白色，避免被旧的染色影响。")]
+        [SerializeField] private bool resetColorToWhiteWhenSwapping = true;
+
 
         private Collider2D[] _colliders2D = System.Array.Empty<Collider2D>();
         private SpriteRenderer[] _spriteRenderers = System.Array.Empty<SpriteRenderer>();
-        private Renderer[] _otherRenderers = System.Array.Empty<Renderer>();
-        private MaterialPropertyBlock _mpb;
 
         private bool _directObserved;
         private bool _entanglementObserved;
@@ -40,8 +45,6 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             _colliders2D = GetComponentsInChildren<Collider2D>(true);
             _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
-            _otherRenderers = GetComponentsInChildren<Renderer>(true);
-            _mpb = new MaterialPropertyBlock();
 
             if (possibleWorldPositions == null || possibleWorldPositions.Length == 0)
             {
@@ -74,9 +77,6 @@ namespace StrangePlaces.DemoQuantumCollapse
             float scaleWobble = 1f + wobble * wobbleScaleAmplitude;
             transform.localScale = _baseScale * scaleWobble;
 
-            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * wobbleSpeed * 0.7f);
-            pulse = Mathf.Clamp01(pulse);
-            ApplyColor(Color.Lerp(unobservedColor * 0.6f, unobservedColor, pulse));
         }
 
         public void SetPossibleWorldPositions(Vector2[] positions)
@@ -170,45 +170,43 @@ namespace StrangePlaces.DemoQuantumCollapse
                 }
             }
 
-            ApplyColor(observed ? observedColor : unobservedColor);
+            ApplySprite(observed);
         }
 
-        private void ApplyColor(Color color)
+        private void ApplySprite(bool observed)
         {
-            if (_spriteRenderers != null && _spriteRenderers.Length > 0)
+            if (!driveSpriteSwap)
             {
-                for (int i = 0; i < _spriteRenderers.Length; i++)
+                return;
+            }
+
+            if (_spriteRenderers == null || _spriteRenderers.Length == 0)
+            {
+                return;
+            }
+
+            Sprite sprite = observed ? observedSprite : unobservedSprite;
+            if (sprite == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _spriteRenderers.Length; i++)
+            {
+                SpriteRenderer r = _spriteRenderers[i];
+                if (r == null)
                 {
-                    if (_spriteRenderers[i] != null)
-                    {
-                        _spriteRenderers[i].color = color;
-                    }
+                    continue;
                 }
 
-                return;
-            }
-
-            if (_otherRenderers == null || _otherRenderers.Length == 0)
-            {
-                return;
-            }
-
-            if (_mpb == null)
-            {
-                _mpb = new MaterialPropertyBlock();
-            }
-
-            _mpb.Clear();
-            _mpb.SetColor("_Color", color);
-            _mpb.SetColor("_BaseColor", color);
-            for (int i = 0; i < _otherRenderers.Length; i++)
-            {
-                Renderer r = _otherRenderers[i];
-                if (r != null)
+                r.sprite = sprite;
+                if (resetColorToWhiteWhenSwapping)
                 {
-                    r.SetPropertyBlock(_mpb);
+                    r.color = Color.white;
                 }
             }
         }
+
     }
 }
+

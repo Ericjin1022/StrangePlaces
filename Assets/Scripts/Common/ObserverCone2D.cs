@@ -26,15 +26,14 @@ namespace StrangePlaces.DemoQuantumCollapse
         [SerializeField] private bool showDebugSamplePoints = false;
         [SerializeField] private Color debugSamplePointColor = new(0.25f, 1f, 0.65f, 0.95f);
         [SerializeField, Range(0.01f, 0.25f)] private float debugSamplePointRadius = 0.05f;
-
         [Header("Line of Sight")]
         [SerializeField] private bool requireLineOfSight = true;
         [SerializeField] private LayerMask raycastMask = ~0;
-        [Tooltip("为 true 时，射线遮挡检测会忽略非目标的 Trigger（常用于避免触发器体积挡光）。注意：如果目标本身是 Trigger，仍然会被当作可观察对象。")]
+        [Tooltip("When true, occlusion raycasts ignore non-target Trigger colliders (to avoid trigger volumes blocking observation). If the target is a Trigger, it is still treated as a target.")]
         [SerializeField] private bool ignoreTriggerOccluders = true;
 
         [Header("Line of Sight Sampling")]
-        [Tooltip("射线采样点数量（越大越不容易漏判“擦边可见”，但开销更高）。")]
+        [Tooltip("Number of perimeter sample points used for line-of-sight checks. Higher = fewer false negatives but more cost.")]
         [SerializeField, Range(4, 64)] private int lineOfSightPerimeterSamples = 20;
 
         [Header("Visual")]
@@ -71,6 +70,27 @@ namespace StrangePlaces.DemoQuantumCollapse
                     Debug.LogWarning("[ObserverCone2D] showDebugLines is enabled, but LineRenderers are not assigned.");
                 }
             }
+        }
+
+        private void OnDisable()
+        {
+            SetAllObserved(false);
+            SetAllEntanglementObserved(false);
+            SetConeVisible(false);
+        }
+
+        public void SetObservationEnabled(bool value)
+        {
+            if (value)
+            {
+                enabled = true;
+                return;
+            }
+
+            SetAllObserved(false);
+            SetAllEntanglementObserved(false);
+            SetConeVisible(false);
+            enabled = false;
         }
 
         private void Start()

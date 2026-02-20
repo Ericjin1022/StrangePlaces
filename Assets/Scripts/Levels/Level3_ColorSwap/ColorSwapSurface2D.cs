@@ -20,6 +20,14 @@ namespace StrangePlaces.Level3_ColorSwap
         [SerializeField] private Collider2D[] colliders = System.Array.Empty<Collider2D>();
 
         [Header("可选：外观")]
+        [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 表现黑白变化（优先级高于颜色染色）。")]
+        [SerializeField] private bool driveSpriteSwap = true;
+        [SerializeField] private Sprite blackSprite;
+        [SerializeField] private Sprite whiteSprite;
+        [Tooltip("切换 Sprite 时，是否将 SpriteRenderer.color 归一为白色，避免被旧的染色影响。")]
+        [SerializeField] private bool resetColorToWhiteWhenSwapping = true;
+
+        [Tooltip("为 true 时，使用 SpriteRenderer.color 进行黑白染色（当 driveSpriteSwap 关闭或贴图未配置时生效）。")]
         [SerializeField] private bool driveSpriteRendererColor = true;
         [Tooltip("如果未手动指定，将自动收集本物体(含子物体)上的 SpriteRenderer。")]
         [SerializeField] private bool autoCollectSpriteRenderers = true;
@@ -44,7 +52,7 @@ namespace StrangePlaces.Level3_ColorSwap
                 colliders = includeChildColliders ? GetComponentsInChildren<Collider2D>(true) : GetComponents<Collider2D>();
             }
 
-            if (driveSpriteRendererColor && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
+            if ((driveSpriteSwap || driveSpriteRendererColor) && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
             {
                 spriteRenderers = includeChildSpriteRenderers ? GetComponentsInChildren<SpriteRenderer>(true) : GetComponents<SpriteRenderer>();
             }
@@ -73,7 +81,7 @@ namespace StrangePlaces.Level3_ColorSwap
 
         private void OnValidate()
         {
-            if (driveSpriteRendererColor && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
+            if ((driveSpriteSwap || driveSpriteRendererColor) && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
             {
                 spriteRenderers = includeChildSpriteRenderers ? GetComponentsInChildren<SpriteRenderer>(true) : GetComponents<SpriteRenderer>();
             }
@@ -102,17 +110,44 @@ namespace StrangePlaces.Level3_ColorSwap
 
         private void ApplyVisual()
         {
-            if (!driveSpriteRendererColor)
-            {
-                return;
-            }
-
             if (spriteRenderers == null || spriteRenderers.Length == 0)
             {
                 return;
             }
 
-            Color color = CurrentColor.ToUnityColor();
+            BinaryColor c = CurrentColor;
+
+            if (driveSpriteSwap && (blackSprite != null || whiteSprite != null))
+            {
+                Sprite s = c == BinaryColor.Black ? blackSprite : whiteSprite;
+                for (int i = 0; i < spriteRenderers.Length; i++)
+                {
+                    SpriteRenderer r = spriteRenderers[i];
+                    if (r == null)
+                    {
+                        continue;
+                    }
+
+                    if (s != null)
+                    {
+                        r.sprite = s;
+                    }
+
+                    if (resetColorToWhiteWhenSwapping)
+                    {
+                        r.color = Color.white;
+                    }
+                }
+
+                return;
+            }
+
+            if (!driveSpriteRendererColor)
+            {
+                return;
+            }
+
+            Color color = c.ToUnityColor();
             for (int i = 0; i < spriteRenderers.Length; i++)
             {
                 if (spriteRenderers[i] != null)
@@ -152,4 +187,5 @@ namespace StrangePlaces.Level3_ColorSwap
         }
     }
 }
+
 
