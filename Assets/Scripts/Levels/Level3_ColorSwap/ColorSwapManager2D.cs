@@ -13,7 +13,21 @@ namespace StrangePlaces.Level3_ColorSwap
         [Tooltip("如果你的材质/Shader支持全局反色，可在此填全局 float 参数名（例如 _SP_Inverted）。留空则不设置 Shader 全局参数。")]
         [SerializeField] private string globalShaderFloatName = "_SP_Inverted";
 
-        public static ColorSwapManager2D Instance { get; private set; }
+        private static ColorSwapManager2D _instance;
+        public static ColorSwapManager2D Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindAnyObjectByType<ColorSwapManager2D>();
+                }
+
+                return _instance;
+            }
+
+            private set => _instance = value;
+        }
 
         public bool IsInverted { get; private set; }
         public PlayerColorSwap2D Player { get; private set; }
