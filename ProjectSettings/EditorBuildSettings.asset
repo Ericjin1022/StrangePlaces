@@ -12,10 +12,16 @@ EditorBuildSettings:
     path: Assets/Scenes/Level1_QuantumCollapse.unity
     guid: 15547a9d80d921d4395c1a164162a99b
   - enabled: 1
-    path: Assets/Scenes/Level2_NegativeMassBox.unity
-    guid: c0cb5da7f5e22654dbb33a72a171f5c6
-  - enabled: 1
     path: Assets/Scenes/Level3_Color.unity
     guid: d5b65dbeeb888b746a403ecc616a88aa
+  - enabled: 1
+    path: Assets/Scenes/Level_Eric_1.unity
+    guid: 11695262c45d48b4d83045c1d23d4154
+  - enabled: 1
+    path: Assets/Scenes/Level_Eric_1 2.unity
+    guid: a1e5620891405e340b09dedf64597690
+  - enabled: 1
+    path: Assets/Scenes/Level_Light_1.unity
+    guid: 9887215157bd951449b0d49e9d0dab2f
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

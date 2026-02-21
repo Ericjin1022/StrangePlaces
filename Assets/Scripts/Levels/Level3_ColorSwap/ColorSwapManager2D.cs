@@ -6,12 +6,12 @@ namespace StrangePlaces.Level3_ColorSwap
     [DisallowMultipleComponent]
     public sealed class ColorSwapManager2D : MonoBehaviour
     {
-        [Header("\u5F00\u5C40")]
-        [Tooltip("\u8BBE\u7F6E\u672C\u5173\u5361\u7684\u5F00\u5C40\u4E16\u754C\u989C\u8272\u3002")]
+        [Header("开局")]
+        [Tooltip("设置本关卡的开局世界颜色。")]
         [SerializeField] private BinaryColor startWorldColor = BinaryColor.White;
 
-        [Header("\u53EF\u9009\uFF1A\u9A71\u52A8 Shader")]
-        [Tooltip("\u5982\u679C\u4F60\u7684\u6750\u8D28/Shader \u652F\u6301\u5168\u5C40\u53CD\u8F6C\uFF0C\u53EF\u586B\u5199\u5168\u5C40 float \u53C2\u6570\u540D\uFF08\u4F8B\u5982 _SP_Inverted\uFF09\u3002\u7559\u7A7A\u5219\u4E0D\u8BBE\u7F6E\u5168\u5C40 Shader \u53C2\u6570\u3002")]
+        [Header("可选：驱动 Shader")]
+        [Tooltip("如果你的材质/Shader 支持全局反转，可填写全局 float 参数名（例如 _SP_Inverted）。留空则不设置全局 Shader 参数。")]
         [SerializeField] private string globalShaderFloatName = "_SP_Inverted";
 
         private static ColorSwapManager2D _instance;
@@ -39,7 +39,7 @@ namespace StrangePlaces.Level3_ColorSwap
         {
             if (Instance != null && Instance != this)
             {
-                Debug.LogWarning("[\u9ED1\u767D\u5207\u6362] \u573A\u666F\u4E2D\u5B58\u5728\u591A\u4E2A ColorSwapManager2D\uFF0C\u5C06\u7981\u7528\u91CD\u590D\u7EC4\u4EF6\u3002", this);
+                Debug.LogWarning("[黑白切换] 场景中存在多个 ColorSwapManager2D，将禁用重复组件。", this);
                 enabled = false;
                 return;
             }
