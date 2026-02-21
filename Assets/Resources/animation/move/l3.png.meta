@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b818c9c240794d44484522ef81e3eb0a
+guid: 3c86185e2c96e274d9b254fc778d5ce9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 228364172943583096
-    second: move_06_0
+      213: 7631975199035128846
+    second: move_03_0
   externalObjects: {}
   serializedVersion: 12
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 400
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -98,13 +98,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: move_06_0
+      name: move_03_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 33
-        width: 526
-        height: 528
+        x: 30
+        y: 0
+        width: 537
+        height: 594
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -112,8 +112,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8776abf51005b2300800000000000000
-      internalID: 228364172943583096
+      spriteID: e0c7411f1093ae960800000000000000
+      internalID: 7631975199035128846
       vertices: []
       indices: 
       edges: []
@@ -128,7 +128,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      move_03_0: 7631975199035128846
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

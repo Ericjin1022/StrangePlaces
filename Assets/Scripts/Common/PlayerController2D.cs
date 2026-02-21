@@ -110,6 +110,9 @@ namespace StrangePlaces.DemoQuantumCollapse
                 _rigidbody2D.AddForce(new Vector2(forceX, 0f), ForceMode2D.Force);
             }
 
+            // 更新是否在地面的状态 (每帧固定刷新，供动画机等引用)
+            IsGrounded();
+
             ApplyJumpForces();
         }
 
@@ -125,12 +128,14 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (!IsGrounded())
             {
+                Debug.Log($"<color=orange>[Player] 取消跳跃起跳：不在地面上 (isG={isG}, Vy={_rigidbody2D.velocity.y:F2})</color>");
                 return;
             }
 
             float impulse = Mathf.Max(0f, jumpImpulse);
             if (impulse > 0.0001f)
             {
+                Debug.Log($"<color=green>[Player] 成功起跳！施加冲量: {impulse} (isG={isG})</color>");
                 _rigidbody2D.AddForce(Vector2.up * impulse, ForceMode2D.Impulse);
             }
 
@@ -204,6 +209,9 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             for (int o = 0; o < origins.Length; o++)
             {
+                // [DEBUG] 在 Scene 视窗实时画出射线 (红色表示正在检测，时间持续0.02秒)
+                Debug.DrawRay(origins[o], Vector2.down * dist, Color.red, 0.02f);
+
                 int hitCount = Physics2D.RaycastNonAlloc(origins[o], Vector2.down, _groundHits, dist, groundMask);
                 for (int i = 0; i < hitCount; i++)
                 {
@@ -224,6 +232,9 @@ namespace StrangePlaces.DemoQuantumCollapse
                     {
                         continue;
                     }
+
+                    // [DEBUG] 如果碰到了有效地面，把这根射线画成绿色 (由于Update刷新极快，绿色会覆盖红色)
+                    Debug.DrawRay(origins[o], Vector2.down * dist, Color.green, 0.02f);
 
                     isG = true;
                     return true;

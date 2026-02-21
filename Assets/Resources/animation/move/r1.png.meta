@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cf1b7e8f60eb43846986fd89c37d1036
+guid: 0dd0d938d871e864d8c085db12cbfd74
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6993472391615454176
-    second: skeleton-jump_12_0
+      213: -6422003961968147503
+    second: move_00_0
   externalObjects: {}
   serializedVersion: 12
   mipmaps:
@@ -98,13 +98,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: skeleton-jump_12_0
+      name: move_00_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 169
-        width: 503
-        height: 410
+        x: 29
+        y: 13
+        width: 502
+        height: 502
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -112,8 +112,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 024624fa9e132fe90800000000000000
-      internalID: -6993472391615454176
+      spriteID: 1d3ccbcfb6570e6a0800000000000000
+      internalID: -6422003961968147503
       vertices: []
       indices: 
       edges: []
@@ -129,7 +129,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      skeleton-jump_12_0: -6993472391615454176
+      move_00_0: -6422003961968147503
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
