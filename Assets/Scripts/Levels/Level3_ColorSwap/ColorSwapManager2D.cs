@@ -62,6 +62,11 @@ namespace StrangePlaces.Level3_ColorSwap
             SetInverted(!IsInverted);
         }
 
+        public void ResetToStartColor()
+        {
+            SetInverted(startWorldColor == BinaryColor.Black);
+        }
+
         public void SetWorldColor(BinaryColor worldColor)
         {
             SetInverted(worldColor == BinaryColor.Black);

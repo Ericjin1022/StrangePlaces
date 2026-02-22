@@ -1,4 +1,5 @@
 using UnityEngine;
+using StrangePlaces.DemoQuantumCollapse;
 
 namespace StrangePlaces.Level3_ColorSwap
 {
@@ -37,6 +38,12 @@ namespace StrangePlaces.Level3_ColorSwap
                 _manager.InvertedChanged += OnInvertedChanged;
             }
 
+            PlayerController2D player = GetComponent<PlayerController2D>();
+            if (player != null)
+            {
+                player.OnRespawn += HandleRespawn;
+            }
+
             ApplyVisual();
         }
 
@@ -45,6 +52,20 @@ namespace StrangePlaces.Level3_ColorSwap
             if (_manager != null)
             {
                 _manager.InvertedChanged -= OnInvertedChanged;
+            }
+
+            PlayerController2D player = GetComponent<PlayerController2D>();
+            if (player != null)
+            {
+                player.OnRespawn -= HandleRespawn;
+            }
+        }
+
+        private void HandleRespawn()
+        {
+            if (_manager != null)
+            {
+                _manager.ResetToStartColor();
             }
         }
 

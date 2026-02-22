@@ -23,6 +23,8 @@ namespace StrangePlaces.DemoQuantumCollapse
         // 缓存参数 Hash
         private readonly int _animSpeed = Animator.StringToHash("Speed");
         private readonly int _animIsJumping = Animator.StringToHash("IsJumping");
+        private readonly int _animDie = Animator.StringToHash("Die");
+        private readonly int _animRespawn = Animator.StringToHash("Respawn");
         // 注意：现在不需要传 IsWhite 给单个 Animator 了，因为黑白分开了，各自状态机内只有跳跃和移动
 
         private void Awake()
@@ -77,6 +79,22 @@ namespace StrangePlaces.DemoQuantumCollapse
             bool shouldJump = !_playerController.isG;
             if (animatorBlack) animatorBlack.SetBool(_animIsJumping, shouldJump);
             if (animatorWhite) animatorWhite.SetBool(_animIsJumping, shouldJump);
+        }
+
+        public void TriggerDeath()
+        {
+            if (animatorBlack) animatorBlack.SetTrigger(_animDie);
+            if (animatorWhite) animatorWhite.SetTrigger(_animDie);
+        }
+
+        public void TriggerRespawn()
+        {
+            // Reset the Die trigger in case it's still queued up, preventing instant re-death if spammed
+            if (animatorBlack) animatorBlack.ResetTrigger(_animDie);
+            if (animatorWhite) animatorWhite.ResetTrigger(_animDie);
+            
+            if (animatorBlack) animatorBlack.SetTrigger(_animRespawn);
+            if (animatorWhite) animatorWhite.SetTrigger(_animRespawn);
         }
     }
 }

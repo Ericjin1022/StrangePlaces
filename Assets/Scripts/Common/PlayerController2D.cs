@@ -44,6 +44,7 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         public Vector2 AimDirection { get; private set; } = Vector2.right;
         public float MoveAxis { get; private set; }
+        public bool IsDead { get; private set; }
 
         private void Awake()
         {
@@ -62,14 +63,16 @@ namespace StrangePlaces.DemoQuantumCollapse
             UpdateAimDirection();
             HandleJump();
 
-            if (transform.position.y < fallY)
+            if (transform.position.y < fallY && !IsDead)
             {
-                Respawn();
+                DieAndRespawn();
             }
         }
 
         private void FixedUpdate()
         {
+            if (IsDead) return;
+
             float moveAxis = Input.GetAxisRaw("Horizontal");
             MoveAxis = moveAxis;
             float desiredVx = moveAxis * moveSpeed;
@@ -118,6 +121,8 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void HandleJump()
         {
+            if (IsDead) return;
+
             bool jumpDown = Input.GetButtonDown("Jump");
             bool jumpHeld = Input.GetButton("Jump");
 
@@ -247,6 +252,8 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void UpdateAimDirection()
         {
+            if (IsDead) return;
+
             Camera camera = Camera.main;
             if (camera == null)
             {
@@ -284,10 +291,42 @@ namespace StrangePlaces.DemoQuantumCollapse
             _spawnPosition = newSpawnPosition;
         }
 
+        public event System.Action OnRespawn;
+
+        public void DieAndRespawn()
+        {
+            if (IsDead) return;
+            StartCoroutine(DieAndRespawnRoutine());
+        }
+
+        private System.Collections.IEnumerator DieAndRespawnRoutine()
+        {
+            IsDead = true;
+            _rigidbody2D.velocity = Vector2.zero;
+            _rigidbody2D.isKinematic = true; // 定格物理
+
+            // Trigger death animation if available
+            PlayerAnimation2D anim = GetComponent<PlayerAnimation2D>();
+            if (anim != null) anim.TriggerDeath();
+
+            // Wait for animation to play
+            yield return new WaitForSeconds(1.5f);
+
+            Respawn();
+        }
+
         public void Respawn()
         {
+            IsDead = false;
+            _rigidbody2D.isKinematic = false;
             _rigidbody2D.velocity = Vector2.zero;
             transform.position = _spawnPosition;
+
+            // Trigger respawn animation to break out of Die state
+            PlayerAnimation2D anim = GetComponent<PlayerAnimation2D>();
+            if (anim != null) anim.TriggerRespawn();
+
+            OnRespawn?.Invoke();
         }
     }
 }
