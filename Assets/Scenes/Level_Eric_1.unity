@@ -7982,8 +7982,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d65c3d93d86646919b7aae8c560ed51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showControls: 1
-  title: "\u5173\u5361\uFF1AEric1"
 --- !u!4 &1390851169
 Transform:
   m_ObjectHideFlags: 0
@@ -9121,8 +9119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d65c3d93d86646919b7aae8c560ed51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showControls: 1
-  title: "\u7B2C\u4E09\u5173\uFF1A\u9ED1\u767D\u5207\u6362"
 --- !u!1 &1660357676
 GameObject:
   m_ObjectHideFlags: 0
@@ -9625,7 +9621,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15941996626a6a644898286fc388be0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  exitObject: {fileID: 367242993}
+  objectsToReveal:
+  - {fileID: 367242993}
+  - {fileID: 1739096994}
+  - {fileID: 21741366}
+  - {fileID: 1041729427}
   hideExitOnStart: 1
   disableAfterReveal: 1
 --- !u!1 &1926583016

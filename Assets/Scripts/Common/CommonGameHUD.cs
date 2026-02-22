@@ -3,14 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class CommonGameHUD : MonoBehaviour
 {
-    [SerializeField] private bool showControls = true;
+    private bool showControls = true;
 
-    [SerializeField] private string controlContent = "移动：A/D 或 ←/→    跳跃：空格    切换黑白：E\n" +
-                                                     "重开：R    返回选关：Esc\n" +
-                                                     "规则：玩家只能站在与自身同色的物体上。\n" +
-                                                     "目标：到达出口（绿色方块）。";
-
-    [SerializeField] private string title = "第三关：黑白切换";
+    private string controlContent = "Move: A/D or ←/→    Jump: Space    Swap Color: E\n" +
+                                                     "Flashlight: F    Restart: R    Level Select: Esc";
 
     private bool _won;
     private bool _didPause;
@@ -66,7 +62,6 @@ public class CommonGameHUD : MonoBehaviour
         GUI.color = Color.white;
 
         GUILayout.BeginArea(new Rect(12, 12, 760, 220));
-        GUILayout.Label($"<b>{title}</b>", _titleStyle);
 
         if (showControls)
         {
@@ -77,7 +72,7 @@ public class CommonGameHUD : MonoBehaviour
         {
             GUILayout.Space(10);
             GUI.color = new Color(0.3f, 1f, 0.4f, 1f);
-            GUILayout.Label("通关！（已暂停）", _winStyle);
+            GUILayout.Label("Stage Cleared! (Paused)", _winStyle);
         }
 
         GUILayout.EndArea();
@@ -90,13 +85,12 @@ public class CommonGameHUD : MonoBehaviour
 
     private void EnsureStyles()
     {
-        if (_titleStyle != null)
+        if (_labelStyle != null)
         {
             return;
         }
 
         GUIStyle baseStyle = GUI.skin.label;
-        _titleStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 16 };
         _labelStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 13, wordWrap = true };
         _winStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 18, fontStyle = FontStyle.Bold };
 
@@ -156,21 +150,21 @@ public class CommonGameHUD : MonoBehaviour
 
         GUILayout.BeginArea(r, GUI.skin.window);
         GUILayout.Space(4);
-        GUILayout.Label("通关成功", _modalTitleStyle);
+        GUILayout.Label("Level Complete", _modalTitleStyle);
         GUILayout.Space(8);
-        GUILayout.Label("游戏已暂停。\n按 Esc 返回选关，按 R 重新开始本关。", _modalBodyStyle);
+        GUILayout.Label("Game Paused.\nPress Esc to return to Level Select, or R to restart.", _modalBodyStyle);
         GUILayout.Space(16);
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("返回选关（Esc）", _buttonStyle, GUILayout.Width(200f)))
+        if (GUILayout.Button("Level Select (Esc)", _buttonStyle, GUILayout.Width(200f)))
         {
             TryUnpause();
             SceneManager.LoadScene("LevelSelect");
         }
 
         GUILayout.Space(12);
-        if (GUILayout.Button("重开本关（R）", _buttonStyle, GUILayout.Width(180f)))
+        if (GUILayout.Button("Restart (R)", _buttonStyle, GUILayout.Width(180f)))
         {
             TryUnpause();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);

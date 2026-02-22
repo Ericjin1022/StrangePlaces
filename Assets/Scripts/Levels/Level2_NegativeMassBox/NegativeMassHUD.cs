@@ -5,7 +5,6 @@ namespace StrangePlaces.DemoQuantumCollapse
 {
     public sealed class NegativeMassHUD : MonoBehaviour
     {
-        [SerializeField] private string title = "第二关：负质量箱子";
 
         private bool _won;
         private bool _didPause;
@@ -61,18 +60,13 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             GUI.color = Color.white;
             GUILayout.BeginArea(new Rect(12, 12, 860, 360));
-
-            GUILayout.Label($"<b>{title}</b>", _titleStyle);
-            GUILayout.Label("目标：打开终点门，并到达终点。", _labelStyle);
-            GUILayout.Label("步骤一：把独立的红箱推到缺口下方，它会向上坠落撞到门开关，终点门永久打开。", _labelStyle);
-            GUILayout.Label("步骤二：把“红箱-黑箱”推到出口正下方，站上红箱，装置会加速上升到出口平台。", _labelStyle);
-            GUILayout.Label("提示：按 Esc 返回选关；按 R 重来本关。", _labelStyle);
+            GUILayout.Label("Move: A/D or ←/→    Jump: Space    Flashlight: F\nRestart: R    Level Select: Esc", _labelStyle);
 
             if (_won)
             {
                 GUILayout.Space(12);
                 GUI.color = new Color(0.3f, 1f, 0.4f, 1f);
-                GUILayout.Label("通关！（已暂停）", _winStyle);
+                GUILayout.Label("Stage Cleared! (Paused)", _winStyle);
             }
 
             GUILayout.EndArea();
@@ -85,13 +79,12 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private void EnsureStyles()
         {
-            if (_titleStyle != null)
+            if (_labelStyle != null)
             {
                 return;
             }
 
             GUIStyle baseStyle = GUI.skin.label;
-            _titleStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 16 };
             _labelStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 13, wordWrap = true };
             _winStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 18, fontStyle = FontStyle.Bold };
 
@@ -151,20 +144,20 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             GUILayout.BeginArea(r, GUI.skin.window);
             GUILayout.Space(4);
-            GUILayout.Label("通关成功", _modalTitleStyle);
+            GUILayout.Label("Level Complete", _modalTitleStyle);
             GUILayout.Space(8);
-            GUILayout.Label("已暂停游戏。\n按 <b>Esc</b> 返回选关，按 <b>R</b> 重新开始本关。", _modalBodyStyle);
+            GUILayout.Label("Game Paused.\nPress <b>Esc</b> to return to Level Select, or <b>R</b> to restart.", _modalBodyStyle);
             GUILayout.Space(16);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("返回选关（Esc）", _buttonStyle, GUILayout.Width(180f)))
+            if (GUILayout.Button("Level Select (Esc)", _buttonStyle, GUILayout.Width(180f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene("LevelSelect");
             }
             GUILayout.Space(12);
-            if (GUILayout.Button("重开本关（R）", _buttonStyle, GUILayout.Width(160f)))
+            if (GUILayout.Button("Restart (R)", _buttonStyle, GUILayout.Width(160f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);

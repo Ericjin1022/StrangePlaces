@@ -5,9 +5,8 @@ namespace StrangePlaces.DemoQuantumCollapse
 {
     public sealed class DemoHUD : MonoBehaviour
     {
-        [SerializeField] private bool showControls = true;
-        [SerializeField] private string title = "第一关：量子观测坍缩（演示）";
-        [SerializeField] private bool showStageHints = false;
+        private bool showControls = true;
+        private bool showStageHints = false;
 
         private bool _won;
         private bool _didPause;
@@ -63,15 +62,11 @@ namespace StrangePlaces.DemoQuantumCollapse
             GUI.color = Color.white;
 
             GUILayout.BeginArea(new Rect(12, 12, 760, 320));
-            GUILayout.Label($"<b>{title}</b>", _titleStyle);
 
             if (showControls)
             {
-                GUILayout.Label("移动：A/D 或 ←/→    跳跃：空格    观察：鼠标指向    重开：R", _labelStyle);
-                GUILayout.Label("返回选关：Esc", _labelStyle);
-                GUILayout.Label("规则 1：量子踏板只有在被观察时才会坍缩成“实体”。", _labelStyle);
-                GUILayout.Label("规则 2：有些门在你观察时会保持关闭；不看它，状态才会变化。", _labelStyle);
-                GUILayout.Label("目标：到达终点（绿色方块）。", _labelStyle);
+                GUILayout.Label("Move: A/D or ←/→    Jump: Space    Look: Mouse", _labelStyle);
+                GUILayout.Label("Flashlight: F    Restart: R    Level Select: Esc", _labelStyle);
             }
 
             if (showStageHints)
@@ -87,7 +82,7 @@ namespace StrangePlaces.DemoQuantumCollapse
             {
                 GUILayout.Space(12);
                 GUI.color = new Color(0.3f, 1f, 0.4f, 1f);
-                GUILayout.Label("通关！（已暂停）", _winStyle);
+                GUILayout.Label("Stage Cleared! (Paused)", _winStyle);
             }
 
             GUILayout.EndArea();
@@ -100,51 +95,17 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private static string[] GetStageHints()
         {
-            PlayerController2D player = FindFirstObjectByType<PlayerController2D>();
-            float x = player != null ? player.transform.position.x : 0f;
-
-            if (x < -8f)
-            {
-                return new[]
-                {
-                    "提示：第一段是“回头路”。站上量子桥后，边走边回头观察它。",
-                    "如果你把视线移开，桥会恢复叠加态，你会掉下去。",
-                };
-            }
-
-            if (x < 6f)
-            {
-                return new[]
-                {
-                    "提示：第二段是“别看门”。你盯着门，它会保持关闭。",
-                    "把视线移开，让门的状态变化到“打开”，再快速通过。",
-                };
-            }
-
-            if (x < 14f)
-            {
-                return new[]
-                {
-                    "提示：第三段需要“两次接力”。先观察并稳定第一块平台，到达中间安全点。",
-                    "然后换角度观察第二块平台。墙会遮挡视线，站位很重要。",
-                };
-            }
-
-            return new[]
-            {
-                "提示：终点在右侧。",
-            };
+            return new string[0];
         }
 
         private void EnsureStyles()
         {
-            if (_titleStyle != null)
+            if (_labelStyle != null)
             {
                 return;
             }
 
             GUIStyle baseStyle = GUI.skin.label;
-            _titleStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 16 };
             _labelStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 13, wordWrap = true };
             _winStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 18, fontStyle = FontStyle.Bold };
 
@@ -204,20 +165,20 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             GUILayout.BeginArea(r, GUI.skin.window);
             GUILayout.Space(4);
-            GUILayout.Label("通关成功", _modalTitleStyle);
+            GUILayout.Label("Level Complete", _modalTitleStyle);
             GUILayout.Space(8);
-            GUILayout.Label("已暂停游戏。\n按 <b>Esc</b> 返回选关，按 <b>R</b> 重新开始本关。", _modalBodyStyle);
+            GUILayout.Label("Game Paused.\nPress <b>Esc</b> to return to Level Select, or <b>R</b> to restart.", _modalBodyStyle);
             GUILayout.Space(16);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("返回选关（Esc）", _buttonStyle, GUILayout.Width(180f)))
+            if (GUILayout.Button("Level Select (Esc)", _buttonStyle, GUILayout.Width(180f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene("LevelSelect");
             }
             GUILayout.Space(12);
-            if (GUILayout.Button("重开本关（R）", _buttonStyle, GUILayout.Width(160f)))
+            if (GUILayout.Button("Restart (R)", _buttonStyle, GUILayout.Width(160f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);

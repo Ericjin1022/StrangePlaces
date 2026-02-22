@@ -7,9 +7,9 @@ namespace StrangePlaces.Level3_ColorSwap
     [RequireComponent(typeof(Collider2D))]
     public sealed class Level3RevealExitOnTrigger2D : MonoBehaviour
     {
-        [Header("引用")]
-        [Tooltip("要显示/启用的出口物体（exit）。")]
-        [SerializeField] private GameObject exitObject;
+        [Header("References")]
+        [Tooltip("Objects to show/enable when triggered.")]
+        [SerializeField] private GameObject[] objectsToReveal;
 
         [Header("行为")]
         [Tooltip("游戏开始时是否隐藏出口物体。")]
@@ -56,19 +56,25 @@ namespace StrangePlaces.Level3_ColorSwap
 
             if (disableAfterReveal)
             {
-                enabled = false;
+                gameObject.SetActive(false);
             }
         }
 
         private void SetExitActive(bool active)
         {
-            if (exitObject == null)
+            if (objectsToReveal == null || objectsToReveal.Length == 0)
             {
-                Debug.LogWarning("[第三关] 未指定出口物体（exitObject），无法切换出口显示状态。", this);
+                Debug.LogWarning("[Level3] No objects to reveal are assigned.", this);
                 return;
             }
 
-            exitObject.SetActive(active);
+            foreach (var obj in objectsToReveal)
+            {
+                if (obj != null)
+                {
+                    obj.SetActive(active);
+                }
+            }
         }
     }
 }

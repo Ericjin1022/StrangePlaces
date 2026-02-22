@@ -5,8 +5,7 @@ namespace StrangePlaces.Level3_ColorSwap
 {
     public sealed class Level3HUD : MonoBehaviour
     {
-        [SerializeField] private bool showControls = true;
-        [SerializeField] private string title = "第三关：黑白切换";
+        private bool showControls = true;
 
         private bool _won;
         private bool _didPause;
@@ -62,21 +61,18 @@ namespace StrangePlaces.Level3_ColorSwap
             GUI.color = Color.white;
 
             GUILayout.BeginArea(new Rect(12, 12, 760, 220));
-            GUILayout.Label($"<b>{title}</b>", _titleStyle);
 
             if (showControls)
             {
-                GUILayout.Label("移动：A/D 或 ←/→    跳跃：空格    切换黑白：E", _labelStyle);
-                GUILayout.Label("重开：R    返回选关：Esc", _labelStyle);
-                GUILayout.Label("规则：玩家只能站在与自身同色的物体上。", _labelStyle);
-                GUILayout.Label("目标：到达出口（绿色方块）。", _labelStyle);
+                GUILayout.Label("Move: A/D or ←/→    Jump: Space    Swap Color: E", _labelStyle);
+                GUILayout.Label("Flashlight: F    Restart: R    Level Select: Esc", _labelStyle);
             }
 
             if (_won)
             {
                 GUILayout.Space(10);
                 GUI.color = new Color(0.3f, 1f, 0.4f, 1f);
-                GUILayout.Label("通关！（已暂停）", _winStyle);
+                GUILayout.Label("Stage Cleared! (Paused)", _winStyle);
             }
 
             GUILayout.EndArea();
@@ -89,13 +85,12 @@ namespace StrangePlaces.Level3_ColorSwap
 
         private void EnsureStyles()
         {
-            if (_titleStyle != null)
+            if (_labelStyle != null)
             {
                 return;
             }
 
             GUIStyle baseStyle = GUI.skin.label;
-            _titleStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 16 };
             _labelStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 13, wordWrap = true };
             _winStyle = new GUIStyle(baseStyle) { richText = true, fontSize = 18, fontStyle = FontStyle.Bold };
 
@@ -155,20 +150,20 @@ namespace StrangePlaces.Level3_ColorSwap
 
             GUILayout.BeginArea(r, GUI.skin.window);
             GUILayout.Space(4);
-            GUILayout.Label("通关成功", _modalTitleStyle);
+            GUILayout.Label("Level Complete", _modalTitleStyle);
             GUILayout.Space(8);
-            GUILayout.Label("游戏已暂停。\n按 Esc 返回选关，按 R 重新开始本关。", _modalBodyStyle);
+            GUILayout.Label("Game Paused.\nPress Esc to return to Level Select, or R to restart.", _modalBodyStyle);
             GUILayout.Space(16);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("返回选关（Esc）", _buttonStyle, GUILayout.Width(200f)))
+            if (GUILayout.Button("Level Select (Esc)", _buttonStyle, GUILayout.Width(200f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene("LevelSelect");
             }
             GUILayout.Space(12);
-            if (GUILayout.Button("重开本关（R）", _buttonStyle, GUILayout.Width(180f)))
+            if (GUILayout.Button("Restart (R)", _buttonStyle, GUILayout.Width(180f)))
             {
                 TryUnpause();
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
