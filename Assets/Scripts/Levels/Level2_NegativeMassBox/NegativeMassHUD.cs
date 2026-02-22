@@ -65,7 +65,7 @@ namespace StrangePlaces.DemoQuantumCollapse
             if (_won)
             {
                 GUILayout.Space(12);
-                GUI.color = new Color(0.3f, 1f, 0.4f, 1f);
+                GUI.color = new Color(0.9f, 0.9f, 0.9f, 1f); // White text instead of green
                 GUILayout.Label("Stage Cleared! (Paused)", _winStyle);
             }
 
@@ -138,10 +138,11 @@ namespace StrangePlaces.DemoQuantumCollapse
             Rect r = new((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
 
             Color old = GUI.color;
-            GUI.color = new Color(0f, 0f, 0f, 0.55f);
+            GUI.color = new Color(0f, 0f, 0f, 0.85f); // Darker background overlay
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
             GUI.color = old;
 
+            GUI.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.95f); // Dark semi-transparent window
             GUILayout.BeginArea(r, GUI.skin.window);
             GUILayout.Space(4);
             GUILayout.Label("Level Complete", _modalTitleStyle);
