@@ -14,10 +14,10 @@ namespace StrangePlaces.Level3_ColorSwap
         [Tooltip("为 true 时：只有当“地面当前颜色 == 玩家当前颜色”时才启用碰撞体。")]
         [SerializeField] private bool colliderOnlyWhenMatchesPlayer = true;
 
-        [Tooltip("如果未手动指定，将自动收集本物体(含子物体)上的 Collider2D。")]
+        [Tooltip("如果自动收集已开启，将自动收集本物体(含子一层物体)上的 Collider2D。")]
         [SerializeField] private bool autoCollectColliders = true;
         [SerializeField] private bool includeChildColliders = true;
-        [SerializeField] private Collider2D[] colliders = System.Array.Empty<Collider2D>();
+        private Collider2D[] colliders = System.Array.Empty<Collider2D>();
 
         [Header("可选：外观")]
         [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 表现黑白变化（优先级高于颜色染色）。")]
@@ -29,10 +29,10 @@ namespace StrangePlaces.Level3_ColorSwap
 
         [Tooltip("为 true 时，使用 SpriteRenderer.color 进行黑白染色（当 driveSpriteSwap 关闭或贴图未配置时生效）。")]
         [SerializeField] private bool driveSpriteRendererColor = true;
-        [Tooltip("如果未手动指定，将自动收集本物体(含子物体)上的 SpriteRenderer。")]
+        [Tooltip("如果自动收集已开启，将自动收集本物体(含子一层物体)上的 SpriteRenderer。")]
         [SerializeField] private bool autoCollectSpriteRenderers = true;
         [SerializeField] private bool includeChildSpriteRenderers = true;
-        [SerializeField] private SpriteRenderer[] spriteRenderers = System.Array.Empty<SpriteRenderer>();
+        private SpriteRenderer[] spriteRenderers = System.Array.Empty<SpriteRenderer>();
 
         private ColorSwapManager2D _manager;
 
@@ -49,12 +49,12 @@ namespace StrangePlaces.Level3_ColorSwap
         {
             if (autoCollectColliders && (colliders == null || colliders.Length == 0))
             {
-                colliders = includeChildColliders ? GetComponentsInChildren<Collider2D>(true) : GetComponents<Collider2D>();
+                colliders = includeChildColliders ? GetComponentsInImmediateChildren<Collider2D>() : GetComponents<Collider2D>();
             }
 
             if ((driveSpriteSwap || driveSpriteRendererColor) && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
             {
-                spriteRenderers = includeChildSpriteRenderers ? GetComponentsInChildren<SpriteRenderer>(true) : GetComponents<SpriteRenderer>();
+                spriteRenderers = includeChildSpriteRenderers ? GetComponentsInImmediateChildren<SpriteRenderer>() : GetComponents<SpriteRenderer>();
             }
         }
 
@@ -83,13 +83,37 @@ namespace StrangePlaces.Level3_ColorSwap
         {
             if ((driveSpriteSwap || driveSpriteRendererColor) && autoCollectSpriteRenderers && (spriteRenderers == null || spriteRenderers.Length == 0))
             {
-                spriteRenderers = includeChildSpriteRenderers ? GetComponentsInChildren<SpriteRenderer>(true) : GetComponents<SpriteRenderer>();
+                spriteRenderers = includeChildSpriteRenderers ? GetComponentsInImmediateChildren<SpriteRenderer>() : GetComponents<SpriteRenderer>();
             }
 
             if (autoCollectColliders && (colliders == null || colliders.Length == 0))
             {
-                colliders = includeChildColliders ? GetComponentsInChildren<Collider2D>(true) : GetComponents<Collider2D>();
+                colliders = includeChildColliders ? GetComponentsInImmediateChildren<Collider2D>() : GetComponents<Collider2D>();
             }
+        }
+
+        private T[] GetComponentsInImmediateChildren<T>() where T : Component
+        {
+            System.Collections.Generic.List<T> list = new System.Collections.Generic.List<T>();
+            
+            // Collect from self
+            T[] selfComps = GetComponents<T>();
+            if (selfComps != null)
+            {
+                list.AddRange(selfComps);
+            }
+
+            // Collect only from transform's direct children
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                T[] childComps = transform.GetChild(i).GetComponents<T>();
+                if (childComps != null)
+                {
+                    list.AddRange(childComps);
+                }
+            }
+
+            return list.ToArray();
         }
 
         private void OnInvertedChanged(bool _)

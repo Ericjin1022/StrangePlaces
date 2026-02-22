@@ -278,10 +278,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 1
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 735132534}
-  - {fileID: 2107240733}
-  - {fileID: 1446047686}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -289,12 +285,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 735132535}
-  - {fileID: 2107240734}
-  - {fileID: 0}
-  - {fileID: 1446047687}
-  - {fileID: 0}
 --- !u!1 &45244852
 GameObject:
   m_ObjectHideFlags: 0
@@ -359,16 +349,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 0
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 510284288}
-  - {fileID: 180686990}
-  - {fileID: 293111345}
-  - {fileID: 1140586482}
-  - {fileID: 522281795}
-  - {fileID: 557269568}
-  - {fileID: 1569843210}
-  - {fileID: 487072214}
-  - {fileID: 264646102}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -376,16 +356,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 510284289}
-  - {fileID: 180686991}
-  - {fileID: 293111346}
-  - {fileID: 1140586483}
-  - {fileID: 522281796}
-  - {fileID: 557269569}
-  - {fileID: 1569843211}
-  - {fileID: 487072215}
-  - {fileID: 264646103}
 --- !u!1 &58601296
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,7 +2059,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -2182,17 +2152,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.013828278, y: 0.010371327}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.25, y: 1.25}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2489109, y: 1.2419965}
   m_EdgeRadius: 0
 --- !u!212 &367242996
 SpriteRenderer:
@@ -2235,8 +2205,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0, g: 0.9811321, b: 0.069398955, a: 1}
+  m_Sprite: {fileID: 4433313184316436507, guid: 2d85fe9f28511b740aae5308429ab1c4, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -3053,7 +3023,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.40392157, g: 0.40392157, b: 0.40392157, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -3996,16 +3966,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 0
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 2006751471}
-  - {fileID: 2015193957}
-  - {fileID: 0}
-  - {fileID: 1830238426}
-  - {fileID: 1799786564}
-  - {fileID: 0}
-  - {fileID: 1138330369}
-  - {fileID: 420581834}
-  - {fileID: 0}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -4013,16 +3973,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 2006751472}
-  - {fileID: 2015193958}
-  - {fileID: 0}
-  - {fileID: 1830238427}
-  - {fileID: 1799786565}
-  - {fileID: 0}
-  - {fileID: 1138330370}
-  - {fileID: 420581835}
-  - {fileID: 0}
 --- !u!1 &735132532
 GameObject:
   m_ObjectHideFlags: 0
@@ -5185,10 +5135,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 1
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 1312687804}
-  - {fileID: 1461058480}
-  - {fileID: 642061358}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -5196,10 +5142,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 1312687805}
-  - {fileID: 1461058481}
-  - {fileID: 642061359}
 --- !u!1 &1077092675
 GameObject:
   m_ObjectHideFlags: 0
@@ -6570,8 +6512,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d65c3d93d86646919b7aae8c560ed51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showControls: 1
-  title: "\u5173\u5361\uFF1AEric1"
 --- !u!4 &1390851169
 Transform:
   m_ObjectHideFlags: 0
@@ -7170,8 +7110,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d65c3d93d86646919b7aae8c560ed51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showControls: 1
-  title: "\u7B2C\u4E09\u5173\uFF1A\u9ED1\u767D\u5207\u6362"
 --- !u!1 &1671123875
 GameObject:
   m_ObjectHideFlags: 0
@@ -7652,10 +7590,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 1
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 263174596}
-  - {fileID: 172328963}
-  - {fileID: 866532718}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -7663,10 +7597,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 263174597}
-  - {fileID: 172328964}
-  - {fileID: 866532719}
 --- !u!1 &1739173559
 GameObject:
   m_ObjectHideFlags: 0
@@ -7728,16 +7658,6 @@ MonoBehaviour:
   colliderOnlyWhenMatchesPlayer: 0
   autoCollectColliders: 1
   includeChildColliders: 1
-  colliders:
-  - {fileID: 1608003336}
-  - {fileID: 547443014}
-  - {fileID: 1307941235}
-  - {fileID: 1717779644}
-  - {fileID: 448717045}
-  - {fileID: 1077092677}
-  - {fileID: 1272381154}
-  - {fileID: 1210212010}
-  - {fileID: 201978094}
   driveSpriteSwap: 1
   blackSprite: {fileID: 8707831148241638558, guid: 2deae4548a479764b8be368d712cd50a, type: 3}
   whiteSprite: {fileID: -3658504805710360349, guid: dca0c8839c6dd9e47b5c6da63ff8c140, type: 3}
@@ -7745,16 +7665,6 @@ MonoBehaviour:
   driveSpriteRendererColor: 1
   autoCollectSpriteRenderers: 1
   includeChildSpriteRenderers: 1
-  spriteRenderers:
-  - {fileID: 1608003337}
-  - {fileID: 547443015}
-  - {fileID: 1307941236}
-  - {fileID: 1717779645}
-  - {fileID: 448717046}
-  - {fileID: 1077092678}
-  - {fileID: 1272381155}
-  - {fileID: 1210212011}
-  - {fileID: 201978095}
 --- !u!1 &1799786562
 GameObject:
   m_ObjectHideFlags: 0
