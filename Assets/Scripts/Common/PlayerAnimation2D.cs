@@ -61,13 +61,13 @@ namespace StrangePlaces.DemoQuantumCollapse
             
             if (moveInput > 0.01f)
             {
-                if (spriteRendererBlack) spriteRendererBlack.flipX = false;
-                if (spriteRendererWhite) spriteRendererWhite.flipX = false;
+                if (spriteRendererBlack) spriteRendererBlack.flipX = true;
+                if (spriteRendererWhite) spriteRendererWhite.flipX = true;
             }
             else if (moveInput < -0.01f)
             {
-                if (spriteRendererBlack) spriteRendererBlack.flipX = true;
-                if (spriteRendererWhite) spriteRendererWhite.flipX = true;
+                if (spriteRendererBlack) spriteRendererBlack.flipX = false;
+                if (spriteRendererWhite) spriteRendererWhite.flipX = false;
             }
 
             // --- 2. 传递速度 (Speed) 给双状态机 ---
@@ -76,9 +76,34 @@ namespace StrangePlaces.DemoQuantumCollapse
             if (animatorWhite) animatorWhite.SetFloat(_animSpeed, speed);
 
             // --- 3. 传递跳跃状态 (IsJumping) 给双状态机 ---
-            bool shouldJump = !_playerController.isG;
-            if (animatorBlack) animatorBlack.SetBool(_animIsJumping, shouldJump);
-            if (animatorWhite) animatorWhite.SetBool(_animIsJumping, shouldJump);
+            // 只有按键起跳才会进入跳跃动画，落地时取消动画。边缘自然掉落不会触发跳跃动画。
+            if (_playerController.isG)
+            {
+                if (animatorBlack) animatorBlack.SetBool(_animIsJumping, false);
+                if (animatorWhite) animatorWhite.SetBool(_animIsJumping, false);
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (_playerController != null)
+            {
+                _playerController.OnJump += HandleJump;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_playerController != null)
+            {
+                _playerController.OnJump -= HandleJump;
+            }
+        }
+
+        private void HandleJump()
+        {
+            if (animatorBlack) animatorBlack.SetBool(_animIsJumping, true);
+            if (animatorWhite) animatorWhite.SetBool(_animIsJumping, true);
         }
 
         public void TriggerDeath()

@@ -133,15 +133,15 @@ namespace StrangePlaces.DemoQuantumCollapse
 
             if (!IsGrounded())
             {
-                Debug.Log($"<color=orange>[Player] 取消跳跃起跳：不在地面上 (isG={isG}, Vy={_rigidbody2D.velocity.y:F2})</color>");
                 return;
             }
 
             float impulse = Mathf.Max(0f, jumpImpulse);
             if (impulse > 0.0001f)
             {
-                Debug.Log($"<color=green>[Player] 成功起跳！施加冲量: {impulse} (isG={isG})</color>");
+                isG = false; // 强制设为 false，防止同帧内的动画机读到 true 瞬间把跳跃动画取消掉
                 _rigidbody2D.AddForce(Vector2.up * impulse, ForceMode2D.Impulse);
+                OnJump?.Invoke();
             }
 
             _jumpHoldRemaining = Mathf.Max(0f, jumpHoldSeconds);
@@ -198,6 +198,13 @@ namespace StrangePlaces.DemoQuantumCollapse
 
         private bool IsGrounded()
         {
+            // 如果正在垂直上升，那么绝对不应该算作在地面上（防止起跳瞬间射线依然打中地面导致动画闪退）
+            if (_rigidbody2D.velocity.y > 0.05f)
+            {
+                isG = false;
+                return false;
+            }
+
             Bounds bounds = _collider2D.bounds;
             float y = bounds.min.y + 0.02f;
             float dist = Mathf.Max(0.001f, groundCheckDistance);
@@ -292,6 +299,7 @@ namespace StrangePlaces.DemoQuantumCollapse
         }
 
         public event System.Action OnRespawn;
+        public event System.Action OnJump;
 
         public void DieAndRespawn()
         {
