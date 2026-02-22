@@ -14,17 +14,7 @@ namespace StrangePlaces.Level3_ColorSwap
         [SerializeField] private bool allowKeyboardToggle = true;
         [SerializeField] private KeyCode toggleKey = KeyCode.E;
 
-        [Header("可选：外观")]
-        [Tooltip("为 true 时，通过切换 SpriteRenderer.sprite 表现黑白变化（优先级高于颜色染色）。")]
-        [SerializeField] private bool driveSpriteSwap = true;
-        [SerializeField] private Sprite blackSprite;
-        [SerializeField] private Sprite whiteSprite;
-        [Tooltip("切换 Sprite 时，是否将 SpriteRenderer.color 归一为白色，避免被旧的染色影响。")]
-        [SerializeField] private bool resetColorToWhiteWhenSwapping = true;
 
-        [Tooltip("为 true 时，使用 SpriteRenderer.color 进行黑白染色（当 driveSpriteSwap 关闭或贴图未配置时生效）。")]
-        [SerializeField] private bool driveSpriteRendererColor = true;
-        [SerializeField] private SpriteRenderer spriteRenderer;
 
         private ColorSwapManager2D _manager;
 
@@ -37,13 +27,6 @@ namespace StrangePlaces.Level3_ColorSwap
             }
         }
 
-        private void Awake()
-        {
-            if (spriteRenderer == null)
-            {
-                spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-            }
-        }
 
         private void OnEnable()
         {
@@ -88,37 +71,22 @@ namespace StrangePlaces.Level3_ColorSwap
             ApplyVisual();
         }
 
+        [Header("双轨动画渲染器 (Dual Track Animators)")]
+        [Tooltip("由于采用双生Animator切换平滑动画，此处填入黑色外观的Renderer")]
+        [SerializeField] private SpriteRenderer rendererBlack;
+        [Tooltip("填入白色外观的Renderer")]
+        [SerializeField] private SpriteRenderer rendererWhite;
+
         private void ApplyVisual()
         {
-            if (spriteRenderer == null)
-            {
-                return;
-            }
-
             BinaryColor c = CurrentColor;
 
-            if (driveSpriteSwap && (blackSprite != null || whiteSprite != null))
+            if (rendererBlack != null && rendererWhite != null)
             {
-                Sprite s = c == BinaryColor.Black ? blackSprite : whiteSprite;
-                if (s != null)
-                {
-                    spriteRenderer.sprite = s;
-                }
-
-                if (resetColorToWhiteWhenSwapping)
-                {
-                    spriteRenderer.color = Color.white;
-                }
-
-                return;
+                bool isBlack = c == BinaryColor.Black;
+                rendererBlack.enabled = isBlack;
+                rendererWhite.enabled = !isBlack;
             }
-
-            if (!driveSpriteRendererColor)
-            {
-                return;
-            }
-
-            spriteRenderer.color = c.ToUnityColor();
         }
     }
 }

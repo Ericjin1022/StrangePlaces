@@ -3,69 +3,80 @@ using StrangePlaces.Level3_ColorSwap;
 
 namespace StrangePlaces.DemoQuantumCollapse
 {
-    [RequireComponent(typeof(Animator))]
-    [RequireComponent(typeof(SpriteRenderer))]
     [RequireComponent(typeof(PlayerController2D))]
     public class PlayerAnimation2D : MonoBehaviour
     {
-        private Animator _animator;
-        private SpriteRenderer _spriteRenderer;
+        [Header("Dual Animators")]
+        [Tooltip("负责播放黑色状态动画的 Animator (挂载在 Body_Black)")]
+        public Animator animatorBlack;
+        [Tooltip("负责播放白色状态动画的 Animator (挂载在 Body_White)")]
+        public Animator animatorWhite;
+
+        [Header("Dual SpriteRenderers")]
+        public SpriteRenderer spriteRendererBlack;
+        public SpriteRenderer spriteRendererWhite;
         
         // 核心脚本引用
         private PlayerController2D _playerController;
         private PlayerColorSwap2D _colorSwap;
         
-        // 缓存参数 Hash，比用字符串名字设置参数性能更好
+        // 缓存参数 Hash
         private readonly int _animSpeed = Animator.StringToHash("Speed");
         private readonly int _animIsJumping = Animator.StringToHash("IsJumping");
-        private readonly int _animIsWhite = Animator.StringToHash("IsWhite");
+        // 注意：现在不需要传 IsWhite 给单个 Animator 了，因为黑白分开了，各自状态机内只有跳跃和移动
 
         private void Awake()
         {
-            _animator = GetComponent<Animator>();
-            _spriteRenderer = GetComponent<SpriteRenderer>();
-            
             _playerController = GetComponent<PlayerController2D>();
-            
-            // 颜色切换脚本不一定在每一个关卡都有，所以安全获取
             _colorSwap = GetComponent<PlayerColorSwap2D>(); 
+            
+            // 兼容防呆：如果没拖拽，尝试从子物体获取
+            if (animatorBlack == null || animatorWhite == null)
+            {
+                Animator[] anims = GetComponentsInChildren<Animator>();
+                if (anims.Length >= 2)
+                {
+                    animatorBlack = anims[0];
+                    animatorWhite = anims[1];
+                }
+            }
+
+            if (spriteRendererBlack == null || spriteRendererWhite == null)
+            {
+                SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+                if (renderers.Length >= 2)
+                {
+                    spriteRendererBlack = renderers[0];
+                    spriteRendererWhite = renderers[1];
+                }
+            }
         }
 
         private void Update()
         {
             // --- 1. 面向朝向翻转 (Flip) ---
-            // 获取水平输入轴 (A/D 键)，如果大于 0 往右走，小于 0 往左走
             float moveInput = _playerController.MoveAxis;
             
             if (moveInput > 0.01f)
             {
-                _spriteRenderer.flipX = false; // 朝右不翻转
+                if (spriteRendererBlack) spriteRendererBlack.flipX = false;
+                if (spriteRendererWhite) spriteRendererWhite.flipX = false;
             }
             else if (moveInput < -0.01f)
             {
-                _spriteRenderer.flipX = true;  // 朝左翻转贴图
+                if (spriteRendererBlack) spriteRendererBlack.flipX = true;
+                if (spriteRendererWhite) spriteRendererWhite.flipX = true;
             }
 
-            // --- 2. 传递速度 (Speed) 给状态机 ---
-            // 使用 Mathf.Abs 取绝对值，因为向左走 moveInput 是负数，但动画机只看绝对值
-            _animator.SetFloat(_animSpeed, Mathf.Abs(moveInput));
+            // --- 2. 传递速度 (Speed) 给双状态机 ---
+            float speed = Mathf.Abs(moveInput);
+            if (animatorBlack) animatorBlack.SetFloat(_animSpeed, speed);
+            if (animatorWhite) animatorWhite.SetFloat(_animSpeed, speed);
 
-            // --- 3. 传递跳跃状态 (IsJumping) 给状态机 ---
-            // 原先跳跃依赖于不在地面上，所以直接用 !isG
+            // --- 3. 传递跳跃状态 (IsJumping) 给双状态机 ---
             bool shouldJump = !_playerController.isG;
-            if (_animator.GetBool(_animIsJumping) != shouldJump)
-            {
-                Debug.Log($"<color=cyan>[Animator] 状态变化 IsJumping 变为了: {shouldJump}</color>");
-            }
-            _animator.SetBool(_animIsJumping, shouldJump);
-
-            // --- 4. 传递黑白状态 (IsWhite) 给状态机 ---
-            if (_colorSwap != null)
-            {
-                // 当前状态是否是白色
-                bool isCurrentlyWhite = _colorSwap.CurrentColor == BinaryColor.White; 
-                _animator.SetBool(_animIsWhite, isCurrentlyWhite);
-            }
+            if (animatorBlack) animatorBlack.SetBool(_animIsJumping, shouldJump);
+            if (animatorWhite) animatorWhite.SetBool(_animIsJumping, shouldJump);
         }
     }
 }
