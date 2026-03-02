@@ -1410,8 +1410,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   manager: {fileID: 1652542715}
   targetImage: {fileID: 134257725}
-  normalSprite: {fileID: 8943299168362265071, guid: 49cf1e0579ea3af4ab35d20e0c018049, type: 3}
-  invertedSprite: {fileID: -7954753313157245522, guid: 706371353063df645b685d2f010751a1, type: 3}
+  whiteSprite: {fileID: 8943299168362265071, guid: 49cf1e0579ea3af4ab35d20e0c018049, type: 3}
+  blackSprite: {fileID: -7954753313157245522, guid: 706371353063df645b685d2f010751a1, type: 3}
   setNativeSize: 0
 --- !u!114 &134257725
 MonoBehaviour:
@@ -8246,7 +8246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1730787035
 Transform:
   m_ObjectHideFlags: 0
@@ -8880,7 +8880,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1951879677
 Transform:
   m_ObjectHideFlags: 0

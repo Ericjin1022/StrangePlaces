@@ -6,16 +6,9 @@ namespace StrangePlaces.Level3_ColorSwap
     [DisallowMultipleComponent]
     public sealed class PlayerColorSwap2D : MonoBehaviour
     {
-        [Header("颜色")]
-        [SerializeField] private BinaryColor baseColor = BinaryColor.Black;
-        [Tooltip("玩家是否跟随全局切换一起翻转颜色。")]
-        [SerializeField] private bool followGlobalSwap = true;
-
         [Header("输入")]
         [SerializeField] private bool allowKeyboardToggle = true;
         [SerializeField] private KeyCode toggleKey = KeyCode.E;
-
-
 
         private ColorSwapManager2D _manager;
 
@@ -23,8 +16,10 @@ namespace StrangePlaces.Level3_ColorSwap
         {
             get
             {
-                bool invert = followGlobalSwap && _manager != null && _manager.IsInverted;
-                return baseColor.InvertIf(invert);
+                if (_manager == null) return BinaryColor.Black; // 缺省保护机制
+
+                // 玩家颜色永远和当前世界绝对颜色保持一致
+                return _manager.StartWorldColor.InvertIf(_manager.IsInverted);
             }
         }
 
@@ -35,7 +30,6 @@ namespace StrangePlaces.Level3_ColorSwap
             if (_manager != null)
             {
                 _manager.RegisterPlayer(this);
-                _manager.InvertedChanged += OnInvertedChanged;
             }
 
             PlayerController2D player = GetComponent<PlayerController2D>();
@@ -43,17 +37,15 @@ namespace StrangePlaces.Level3_ColorSwap
             {
                 player.OnRespawn += HandleRespawn;
             }
+        }
 
+        private void Start()
+        {
             ApplyVisual();
         }
 
         private void OnDisable()
         {
-            if (_manager != null)
-            {
-                _manager.InvertedChanged -= OnInvertedChanged;
-            }
-
             PlayerController2D player = GetComponent<PlayerController2D>();
             if (player != null)
             {
@@ -71,6 +63,8 @@ namespace StrangePlaces.Level3_ColorSwap
 
         private void Update()
         {
+            ApplyVisual();
+
             if (!allowKeyboardToggle)
             {
                 return;
@@ -85,11 +79,6 @@ namespace StrangePlaces.Level3_ColorSwap
             {
                 _manager.Toggle();
             }
-        }
-
-        private void OnInvertedChanged(bool _)
-        {
-            ApplyVisual();
         }
 
         [Header("双轨动画渲染器 (Dual Track Animators)")]

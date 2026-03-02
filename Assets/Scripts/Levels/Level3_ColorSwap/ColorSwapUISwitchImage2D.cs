@@ -11,10 +11,10 @@ namespace StrangePlaces.Level3_ColorSwap
         [SerializeField] private Image targetImage;
 
         [Header("\u8D34\u56FE")]
-        [Tooltip("\u5168\u5C40\u72B6\u6001\u4E3A\u201C\u975E\u53CD\u8F6C\u201D\u65F6\u663E\u793A\u7684\u8D34\u56FE\u3002")]
-        [SerializeField] private Sprite normalSprite;
-        [Tooltip("\u5168\u5C40\u72B6\u6001\u4E3A\u201C\u53CD\u8F6C\u201D\u65F6\u663E\u793A\u7684\u8D34\u56FE\u3002")]
-        [SerializeField] private Sprite invertedSprite;
+        [Tooltip("世界颜色为 白色 时的 UI 贴图。")]
+        [SerializeField] private Sprite whiteSprite;
+        [Tooltip("世界颜色为 黑色 时的 UI 贴图。")]
+        [SerializeField] private Sprite blackSprite;
 
         [Header("\u53EF\u9009")]
         [Tooltip("\u5207\u6362\u8D34\u56FE\u540E\u662F\u5426\u8C03\u7528 Image.SetNativeSize()\uFF0C\u4EE5\u8D34\u56FE\u539F\u59CB\u5C3A\u5BF8\u4E3A\u51C6\u3002")]
@@ -30,21 +30,12 @@ namespace StrangePlaces.Level3_ColorSwap
         private void OnEnable()
         {
             EnsureRefs();
-
-            if (manager != null)
-            {
-                manager.InvertedChanged += OnInvertedChanged;
-            }
-
             Apply();
         }
 
-        private void OnDisable()
+        private void Update()
         {
-            if (manager != null)
-            {
-                manager.InvertedChanged -= OnInvertedChanged;
-            }
+            Apply();
         }
 
         private void OnValidate()
@@ -53,11 +44,6 @@ namespace StrangePlaces.Level3_ColorSwap
             {
                 targetImage = GetComponent<Image>();
             }
-        }
-
-        private void OnInvertedChanged(bool _)
-        {
-            Apply();
         }
 
         private void EnsureRefs()
@@ -83,10 +69,13 @@ namespace StrangePlaces.Level3_ColorSwap
                 return;
             }
 
-            Sprite s = manager.IsInverted ? invertedSprite : normalSprite;
+            // 获取当前的绝对世界颜色
+            bool currentIsBlack = manager.CurrentWorldColor == BinaryColor.Black;
+
+            Sprite s = currentIsBlack ? blackSprite : whiteSprite;
             if (s == null)
             {
-                // \u6CA1\u914D\u8D34\u56FE\u65F6\u4E0D\u5F3A\u884C\u6E05\u7A7A\uff0c\u907F\u514D\u4F60\u60F3\u7528\u73B0\u6709\u56FE\u7247\u505A\u9ED8\u8BA4\u3002
+                // 没配贴图时不强行清空，避免你想用现有图片做默认。
                 return;
             }
 
@@ -96,6 +85,7 @@ namespace StrangePlaces.Level3_ColorSwap
             }
 
             targetImage.sprite = s;
+            Debug.Log("currentIsBlack: " + currentIsBlack);
             if (setNativeSize)
             {
                 targetImage.SetNativeSize();

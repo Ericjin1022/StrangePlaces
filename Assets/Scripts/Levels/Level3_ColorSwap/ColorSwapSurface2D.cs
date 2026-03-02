@@ -40,8 +40,13 @@ namespace StrangePlaces.Level3_ColorSwap
         {
             get
             {
-                bool invert = followGlobalSwap && _manager != null && _manager.IsInverted;
-                return baseColor.InvertIf(invert);
+                if (!followGlobalSwap || _manager == null)
+                {
+                    return baseColor;
+                }
+
+                // 如果勾选了 followGlobalSwap，那么baseColor不重要了，永远跟着世界颜色走
+                return _manager.CurrentWorldColor;
             }
         }
 
